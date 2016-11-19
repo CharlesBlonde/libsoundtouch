@@ -1,0 +1,6 @@
+.idea/
+*.iml
+.coverage
+.tox/
+libsoundtouch.egg-info/
+*.pyc
