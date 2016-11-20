@@ -8,7 +8,6 @@ This library has been created in order to create a component for the [Home Assis
 
 ## How to use it ?
 
-Work in progress
 
 ```shell
 pip install libsoundtouch

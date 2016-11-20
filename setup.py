@@ -12,12 +12,13 @@ PROJECT_CLASSIFIERS = [
     'License :: OSI Approved :: Apache Software License',
     'Operating System :: OS Independent',
     'Programming Language :: Python :: 3.4',
+    'Programming Language :: Python :: 2.7',
     'Topic :: Software Development :: Libraries'
 ]
 
 setup(
     name="libsoundtouch",
-    version="0.0.1",
+    version="0.1.0",
     license="Apache License 2.0",
     url="https://github.com/CharlesBlonde/libsoundtouch",
     download_url="https://github.com/CharlesBlonde/libsoundtouch",
