@@ -24,6 +24,9 @@ class MockDevice(SoundTouchDevice):
         self._port = port
         self._zone_status = None
         self._config = None
+        self._status = None
+        self._volume = None
+        self._presets = None
 
     def set_base_config(self, ip, id):
         xml = """<?xml version="1.0" encoding="UTF-8" ?>
@@ -476,105 +479,106 @@ class TestLibSoundTouch(unittest.TestCase):
     @mock.patch('requests.get', side_effect=_mocked_status_spotify)
     def test_status_spotify(self, mocked_device_status):
         device = MockDevice("192.168.1.1")
-        device.refresh_status()
-        self.assertEqual(mocked_device_status.call_count, 1)
-        self.assertEqual(device.status.source, "SPOTIFY")
-        self.assertEqual(device.status.content_item.name, "Metallica")
-        self.assertEqual(device.status.content_item.source, "SPOTIFY")
-        self.assertEqual(device.status.content_item.type, "uri")
-        self.assertEqual(device.status.content_item.location,
+        status = device.status()
+        self.assertEqual(status.source, "SPOTIFY")
+        self.assertEqual(status.content_item.name, "Metallica")
+        self.assertEqual(status.content_item.source, "SPOTIFY")
+        self.assertEqual(status.content_item.type, "uri")
+        self.assertEqual(status.content_item.location,
                          "spotify:artist:2ye2Wgw4gimLv2eAKyk1NB")
-        self.assertEqual(device.status.content_item.source_account,
+        self.assertEqual(status.content_item.source_account,
                          "spotify_account")
-        self.assertEqual(device.status.content_item.is_presetable, True)
-        self.assertEqual(device.status.track, "Nothing Else Matters (Live)")
-        self.assertEqual(device.status.artist, "Metallica")
+        self.assertEqual(status.content_item.is_presetable, True)
+        self.assertEqual(status.track, "Nothing Else Matters (Live)")
+        self.assertEqual(status.artist, "Metallica")
         album = "Metallica Through The Never (Music from the Motion Picture)"
-        self.assertEqual(device.status.album, album)
+        self.assertEqual(status.album, album)
         image = "http://i.scdn.co/image/1362a06f43"
-        self.assertEqual(device.status.image, image)
-        self.assertEqual(device.status.duration, 441)
-        self.assertEqual(device.status.position, 402)
-        self.assertEqual(device.status.play_status, "PLAY_STATE")
-        self.assertEqual(device.status.shuffle_setting, "SHUFFLE_OFF")
-        self.assertEqual(device.status.repeat_setting, "REPEAT_OFF")
-        self.assertEqual(device.status.stream_type, "TRACK_ONDEMAND")
-        self.assertEqual(device.status.track_id,
+        self.assertEqual(status.image, image)
+        self.assertEqual(status.duration, 441)
+        self.assertEqual(status.position, 402)
+        self.assertEqual(status.play_status, "PLAY_STATE")
+        self.assertEqual(status.shuffle_setting, "SHUFFLE_OFF")
+        self.assertEqual(status.repeat_setting, "REPEAT_OFF")
+        self.assertEqual(status.stream_type, "TRACK_ONDEMAND")
+        self.assertEqual(status.track_id,
                          "spotify:track:1HoBsGG0Ss2Wv5Ky8pkCEf")
+        self.assertEqual(mocked_device_status.call_count, 1)
+        # Force refresh
+        self.assertEqual(device.status().source, "SPOTIFY")
+        self.assertEqual(device.status().content_item.name, "Metallica")
+        self.assertEqual(mocked_device_status.call_count, 3)
+
+        # Don't refresh
+        self.assertEqual(device.status(refresh=False).source, "SPOTIFY")
+        self.assertEqual(device.status(refresh=False).content_item.name,
+                         "Metallica")
+        self.assertEqual(mocked_device_status.call_count, 3)
 
     @mock.patch('requests.get', side_effect=_mocked_status_radio)
     def test_status_radio(self, mocked_device_status):
         device = MockDevice("192.168.1.1")
-        device.refresh_status()
+        status = device.status()
         self.assertEqual(mocked_device_status.call_count, 1)
-        self.assertEqual(device.status.source, "INTERNET_RADIO")
-        self.assertEqual(device.status.content_item.source, "INTERNET_RADIO")
-        self.assertEqual(device.status.content_item.location, "21630")
-        self.assertEqual(device.status.content_item.source_account, "")
-        self.assertEqual(device.status.content_item.is_presetable, True)
-        self.assertIsNone(device.status.track)
-        self.assertIsNone(device.status.artist)
-        self.assertIsNone(device.status.album)
-        self.assertEqual(device.status.image,
+        self.assertEqual(status.source, "INTERNET_RADIO")
+        self.assertEqual(status.content_item.source, "INTERNET_RADIO")
+        self.assertEqual(status.content_item.location, "21630")
+        self.assertEqual(status.content_item.source_account, "")
+        self.assertEqual(status.content_item.is_presetable, True)
+        self.assertIsNone(status.track)
+        self.assertIsNone(status.artist)
+        self.assertIsNone(status.album)
+        self.assertEqual(status.image,
                          "http://item.radio456.com/007452/logo/logo-21630.jpg")
-        self.assertEqual(device.status.station_name, "RMC Info Talk Sport")
-        self.assertEqual(device.status.description,
+        self.assertEqual(status.station_name, "RMC Info Talk Sport")
+        self.assertEqual(status.description,
                          "MP3 64 kbps Paris France, Radio du sport")
-        self.assertEqual(device.status.station_location, "Paris France")
+        self.assertEqual(status.station_location, "Paris France")
 
     @mock.patch('requests.get', side_effect=_mocked_status_stored_music)
     def test_status_stored_music(self, mocked_device_status):
         device = MockDevice("192.168.1.1")
-        device.refresh_status()
+        status = device.status()
         self.assertEqual(mocked_device_status.call_count, 1)
-        self.assertEqual(device.status.source, "STORED_MUSIC")
-        self.assertEqual(device.status.content_item.source, "STORED_MUSIC")
-        self.assertEqual(device.status.content_item.location, "27$2745")
-        self.assertIsNone(device.status.image)
+        self.assertEqual(status.source, "STORED_MUSIC")
+        self.assertEqual(status.content_item.source, "STORED_MUSIC")
+        self.assertEqual(status.content_item.location, "27$2745")
+        self.assertIsNone(status.image)
 
     @mock.patch('requests.get', side_effect=_mocked_status_standby)
     def test_status_standby(self, mocked_device_status):
         device = MockDevice("192.168.1.1")
-        device.refresh_status()
+        status = device.status()
         self.assertEqual(mocked_device_status.call_count, 1)
-        self.assertEqual(device.status.source, "STANDBY")
-        self.assertEqual(device.status.content_item.source, "STANDBY")
+        self.assertEqual(status.source, "STANDBY")
+        self.assertEqual(status.content_item.source, "STANDBY")
 
     @mock.patch('requests.get', side_effect=_mocked_volume)
     def test_volume(self, mocked_volume):
         device = MockDevice("192.168.1.1")
-        device.refresh_volume()
+        volume = device.volume()
         self.assertEqual(mocked_volume.call_count, 1)
-        self.assertEqual(device.volume.actual, 25)
-        self.assertEqual(device.volume.target, 26)
-        self.assertEqual(device.volume.muted, False)
+        self.assertEqual(volume.actual, 25)
+        self.assertEqual(volume.target, 26)
+        self.assertEqual(volume.muted, False)
 
-    @mock.patch('libsoundtouch.SoundTouchDevice.refresh_status',
-                side_effect=None)
     @mock.patch('requests.post', side_effect=_mocked_play)
-    def test_play(self, mocked_play, refresh):
+    def test_play(self, mocked_play):
         device = MockDevice("192.168.1.1")
         device.play()
         self.assertEqual(mocked_play.call_count, 2)
-        self.assertEqual(refresh.call_count, 1)
 
-    @mock.patch('libsoundtouch.SoundTouchDevice.refresh_status',
-                side_effect=None)
     @mock.patch('requests.post', side_effect=_mocked_pause)
-    def test_plause(self, mocked_pause, refresh):
+    def test_pause(self, mocked_pause):
         device = MockDevice("192.168.1.1")
         device.pause()
         self.assertEqual(mocked_pause.call_count, 2)
-        self.assertEqual(refresh.call_count, 1)
 
-    @mock.patch('libsoundtouch.SoundTouchDevice.refresh_status',
-                side_effect=None)
     @mock.patch('requests.post', side_effect=_mocked_play_pause)
-    def test_play_plause(self, mocked_play_pause, refresh):
+    def test_play_plause(self, mocked_play_pause):
         device = MockDevice("192.168.1.1")
         device.play_pause()
         self.assertEqual(mocked_play_pause.call_count, 2)
-        self.assertEqual(refresh.call_count, 1)
 
     @mock.patch('libsoundtouch.SoundTouchDevice.refresh_status',
                 side_effect=None)
@@ -620,32 +624,23 @@ class TestLibSoundTouch(unittest.TestCase):
         self.assertEqual(mocked_power.call_count, 0)
         self.assertEqual(refresh.call_count, 1)
 
-    @mock.patch('libsoundtouch.SoundTouchDevice.refresh_volume',
-                side_effect=None)
     @mock.patch('requests.post', side_effect=_mocked_set_volume)
-    def test_set_volume(self, mocked_set_volume, mocked_refresh_volume):
+    def test_set_volume(self, mocked_set_volume):
         device = MockDevice("192.168.1.1")
         device.set_volume(10)
         self.assertEqual(mocked_set_volume.call_count, 1)
-        self.assertEqual(mocked_refresh_volume.call_count, 1)
 
-    @mock.patch('libsoundtouch.SoundTouchDevice.refresh_volume',
-                side_effect=None)
     @mock.patch('requests.post', side_effect=_mocked_volume_up)
-    def test_volume_up(self, mocked_volume_up, mocked_refresh_volume):
+    def test_volume_up(self, mocked_volume_up):
         device = MockDevice("192.168.1.1")
         device.volume_up()
         self.assertEqual(mocked_volume_up.call_count, 2)
-        self.assertEqual(mocked_refresh_volume.call_count, 1)
 
-    @mock.patch('libsoundtouch.SoundTouchDevice.refresh_volume',
-                side_effect=None)
     @mock.patch('requests.post', side_effect=_mocked_volume_down)
-    def test_volume_down(self, mocked_volume_down, mocked_refresh_volume):
+    def test_volume_down(self, mocked_volume_down):
         device = MockDevice("192.168.1.1")
         device.volume_down()
         self.assertEqual(mocked_volume_down.call_count, 2)
-        self.assertEqual(mocked_refresh_volume.call_count, 1)
 
     @mock.patch('requests.post', side_effect=_mocked_next_track)
     def test_next_track(self, mocked_next_track):
@@ -659,75 +654,57 @@ class TestLibSoundTouch(unittest.TestCase):
         device.previous_track()
         self.assertEqual(mocked_previous_track.call_count, 2)
 
-    @mock.patch('libsoundtouch.SoundTouchDevice.refresh_volume',
-                side_effect=None)
     @mock.patch('requests.post', side_effect=_mocked_mute)
-    def test_mute(self, mocked_mute, refresh_volume):
+    def test_mute(self, mocked_mute):
         device = MockDevice("192.168.1.1")
         device.mute()
         self.assertEqual(mocked_mute.call_count, 2)
-        self.assertEqual(refresh_volume.call_count, 1)
 
-    @mock.patch('libsoundtouch.SoundTouchDevice.refresh_status',
-                side_effect=None)
     @mock.patch('requests.post', side_effect=_mocked_repeat_one)
-    def test_repeat_one(self, mocked_repeat_one, refresh_status):
+    def test_repeat_one(self, mocked_repeat_one):
         device = MockDevice("192.168.1.1")
         device.repeat_one()
         self.assertEqual(mocked_repeat_one.call_count, 2)
-        self.assertEqual(refresh_status.call_count, 1)
 
-    @mock.patch('libsoundtouch.SoundTouchDevice.refresh_status',
-                side_effect=None)
     @mock.patch('requests.post', side_effect=_mocked_repeat_all)
-    def test_repeat_all(self, mocked_repeat_all, refresh_status):
+    def test_repeat_all(self, mocked_repeat_all):
         device = MockDevice("192.168.1.1")
         device.repeat_all()
         self.assertEqual(mocked_repeat_all.call_count, 2)
-        self.assertEqual(refresh_status.call_count, 1)
 
-    @mock.patch('libsoundtouch.SoundTouchDevice.refresh_status',
-                side_effect=None)
     @mock.patch('requests.post', side_effect=_mocked_repeat_off)
-    def test_repeat_off(self, mocked_repeat_off, refresh_status):
+    def test_repeat_off(self, mocked_repeat_off):
         device = MockDevice("192.168.1.1")
         device.repeat_off()
         self.assertEqual(mocked_repeat_off.call_count, 2)
-        self.assertEqual(refresh_status.call_count, 1)
 
-    @mock.patch('libsoundtouch.SoundTouchDevice.refresh_status',
-                side_effect=None)
     @mock.patch('requests.post', side_effect=_mocked_shuffle_on)
-    def test_shuffle_on(self, mocked_shuffle, refresh_status):
+    def test_shuffle_on(self, mocked_shuffle):
         device = MockDevice("192.168.1.1")
         device.shuffle(True)
         self.assertEqual(mocked_shuffle.call_count, 2)
-        self.assertEqual(refresh_status.call_count, 1)
 
-    @mock.patch('libsoundtouch.SoundTouchDevice.refresh_status',
-                side_effect=None)
     @mock.patch('requests.post', side_effect=_mocked_shuffle_off)
-    def test_shuffle_off(self, mocked_shuffle, refresh_status):
+    def test_shuffle_off(self, mocked_shuffle):
         device = MockDevice("192.168.1.1")
         device.shuffle(False)
         self.assertEqual(mocked_shuffle.call_count, 2)
-        self.assertEqual(refresh_status.call_count, 1)
 
     @mock.patch('requests.get', side_effect=_mocked_presets)
     def test_presets(self, mocked_presets):
         device = MockDevice("192.168.1.1")
-        device.refresh_presets()
+        presets = device.presets()
         self.assertEqual(mocked_presets.call_count, 1)
-        self.assertEqual(len(device.presets), 6)
-        self.assertEqual(device.presets[0].name, "Zedd")
-        self.assertEqual(device.presets[0].preset_id, "1")
-        self.assertEqual(device.presets[0].source, "SPOTIFY")
-        self.assertEqual(device.presets[0].type, "uri")
-        self.assertEqual(device.presets[0].location,
+        self.assertEqual(len(presets), 6)
+        self.assertEqual(presets[0].name, "Zedd")
+        self.assertEqual(presets[0].preset_id, "1")
+        self.assertEqual(presets[0].source, "SPOTIFY")
+        self.assertEqual(presets[0].type, "uri")
+        self.assertEqual(presets[0].location,
                          "spotify:artist:2qxJFvFYMEDqd7ui6kSAcq")
-        self.assertEqual(device.presets[0].source_account, "spotify_account")
-        self.assertEqual(device.presets[0].is_presetable, True)
-        self.assertIsNotNone(device.presets[0].source_xml)
+        self.assertEqual(presets[0].source_account, "spotify_account")
+        self.assertEqual(presets[0].is_presetable, True)
+        self.assertIsNotNone(presets[0].source_xml)
 
     @mock.patch('requests.post', side_effect=_mocked_select_preset)
     def test_select_preset(self, mocked_select_preset):
@@ -739,33 +716,33 @@ class TestLibSoundTouch(unittest.TestCase):
     @mock.patch('requests.get', side_effect=_mocked_zone_status_master)
     def test_zone_status_master(self, mocked_zone_status):
         device = MockDevice("192.168.1.1")
-        device.refresh_zone_status()
+        zone_status = device.zone_status()
         self.assertEqual(mocked_zone_status.call_count, 1)
-        self.assertTrue(device.zone_status.is_master)
-        self.assertEqual(device.zone_status.master_id, "1111MASTER")
-        self.assertIsNone(device.zone_status.master_ip)
-        self.assertEqual(len(device.zone_status.slaves), 1)
-        self.assertEqual(device.zone_status.slaves[0].device_ip, "192.168.1.2")
-        self.assertEqual(device.zone_status.slaves[0].role, "NORMAL")
+        self.assertTrue(zone_status.is_master)
+        self.assertEqual(zone_status.master_id, "1111MASTER")
+        self.assertIsNone(zone_status.master_ip)
+        self.assertEqual(len(zone_status.slaves), 1)
+        self.assertEqual(zone_status.slaves[0].device_ip, "192.168.1.2")
+        self.assertEqual(zone_status.slaves[0].role, "NORMAL")
 
     @mock.patch('requests.get', side_effect=_mocked_zone_status_slave)
     def test_zone_status_slave(self, mocked_zone_status):
         device = MockDevice("192.168.1.2")
-        device.refresh_zone_status()
+        zone_status = device.zone_status()
         self.assertEqual(mocked_zone_status.call_count, 1)
-        self.assertFalse(device.zone_status.is_master)
-        self.assertEqual(device.zone_status.master_id, "1111MASTER")
-        self.assertEqual(device.zone_status.master_ip, "192.168.1.1")
-        self.assertEqual(len(device.zone_status.slaves), 1)
-        self.assertEqual(device.zone_status.slaves[0].device_ip, "192.168.1.2")
-        self.assertEqual(device.zone_status.slaves[0].role, "NORMAL")
+        self.assertFalse(zone_status.is_master)
+        self.assertEqual(zone_status.master_id, "1111MASTER")
+        self.assertEqual(zone_status.master_ip, "192.168.1.1")
+        self.assertEqual(len(zone_status.slaves), 1)
+        self.assertEqual(zone_status.slaves[0].device_ip, "192.168.1.2")
+        self.assertEqual(zone_status.slaves[0].role, "NORMAL")
 
     @mock.patch('requests.get', side_effect=_mocked_zone_status_none)
     def test_zone_status_none(self, mocked_zone_status):
         device = MockDevice("192.168.1.1")
-        device.refresh_zone_status()
+        zone_status = device.zone_status()
         self.assertEqual(mocked_zone_status.call_count, 1)
-        self.assertIsNone(device.zone_status)
+        self.assertIsNone(zone_status)
 
     @mock.patch('requests.post', side_effect=_mocked_create_zone)
     def test_create_zone(self, mocked_create_zone):

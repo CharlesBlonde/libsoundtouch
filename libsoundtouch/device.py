@@ -82,7 +82,7 @@ class SoundTouchDevice:
         self._status = None
         self._volume = None
         self._zone_status = None
-        self._presets = []
+        self._presets = None
 
     def __init_config(self):
         response = requests.get(
@@ -118,9 +118,10 @@ class SoundTouchDevice:
         response = requests.get(
             "http://" + self._host + ":" + str(self._port) + "/getZone")
         dom = minidom.parseString(response.text)
-        # self._zone_status = None
         if len(_get_dom_elements(dom, "member")) != 0:
             self._zone_status = ZoneStatus(dom)
+        else:
+            self._zone_status = None
 
     def select_preset(self, preset):
         """Play selected preset.
@@ -174,8 +175,7 @@ class SoundTouchDevice:
 
         :param slaves: List of slaves. Can not be empty
         """
-        self.refresh_zone_status()
-        if self.zone_status is None:
+        if self.zone_status() is None:
             raise NoExistingZoneException()
         request_body = self._get_zone_request_body(slaves)
         _LOGGER.info("Adding slaves to multi-room zone with master device %s",
@@ -196,8 +196,7 @@ class SoundTouchDevice:
         :param slaves: List of slaves to remove
 
         """
-        self.refresh_zone_status()
-        if self.zone_status is None:
+        if self.zone_status() is None:
             raise NoExistingZoneException()
         request_body = self._get_zone_request_body(slaves)
         _LOGGER.info("Removing slaves from multi-room zone with master " +
@@ -230,24 +229,40 @@ class SoundTouchDevice:
         """Get config object."""
         return self._config
 
-    @property
-    def status(self):
-        """Get status object."""
+    def status(self, refresh=True):
+        """Get status object.
+
+        :param refresh: Force refresh, else return old data.
+        """
+        if self._status is None or refresh:
+            self.refresh_status()
         return self._status
 
-    @property
-    def volume(self):
-        """Get volume object."""
+    def volume(self, refresh=True):
+        """Get volume object.
+
+        :param refresh: Force refresh, else return old data.
+        """
+        if self._volume is None or refresh:
+            self.refresh_volume()
         return self._volume
 
-    @property
-    def zone_status(self):
-        """Get Zone Status."""
+    def zone_status(self, refresh=True):
+        """Get Zone Status.
+
+        :param refresh: Force refresh, else return old data.
+        """
+        if self._zone_status is None or refresh:
+            self.refresh_zone_status()
         return self._zone_status
 
-    @property
-    def presets(self):
-        """Presets."""
+    def presets(self, refresh=True):
+        """Presets.
+
+        :param refresh: Force refresh, else return old data.
+        """
+        if self._presets is None or refresh:
+            self.refresh_presets()
         return self._presets
 
     def set_volume(self, level):
@@ -256,22 +271,18 @@ class SoundTouchDevice:
         volume = '<volume>%s</volume>' % level
         requests.post('http://' + self._host + ":" + str(self._port) + action,
                       volume)
-        self.refresh_volume()
 
     def mute(self):
         """Mute/Un-mute volume."""
         self._send_key(KEY_MUTE)
-        self.refresh_volume()
 
     def volume_up(self):
         """Volume up."""
         self._send_key(KEY_VOLUME_UP)
-        self.refresh_volume()
 
     def volume_down(self):
         """Volume down."""
         self._send_key(KEY_VOLUME_DOWN)
-        self.refresh_volume()
 
     def next_track(self):
         """Switch to next track."""
@@ -284,32 +295,26 @@ class SoundTouchDevice:
     def pause(self):
         """Pause."""
         self._send_key(KEY_PAUSE)
-        self.refresh_status()
 
     def play(self):
         """Play."""
         self._send_key(KEY_PLAY)
-        self.refresh_status()
 
     def play_pause(self):
         """Toggle play status."""
         self._send_key(KEY_PLAY_PAUSE)
-        self.refresh_status()
 
     def repeat_off(self):
         """Turn off repeat."""
         self._send_key(KEY_REPEAT_OFF)
-        self.refresh_status()
 
     def repeat_one(self):
         """Repeat one. Doesn't work."""
         self._send_key(KEY_REPEAT_ONE)
-        self.refresh_status()
 
     def repeat_all(self):
         """Repeat all."""
         self._send_key(KEY_REPEAT_ALL)
-        self.refresh_status()
 
     def shuffle(self, shuffle):
         """Shuffle on/off.
@@ -320,18 +325,15 @@ class SoundTouchDevice:
             self._send_key(KEY_SHUFFLE_ON)
         else:
             self._send_key(KEY_SHUFFLE_OFF)
-        self.refresh_status()
 
     def power_on(self):
         """Power on device."""
-        self.refresh_status()
-        if self.status.source == STATE_STANDBY:
+        if self.status().source == STATE_STANDBY:
             self._send_key(KEY_POWER)
 
     def power_off(self):
         """Power off device."""
-        self.refresh_status()
-        if self.status.source != STATE_STANDBY:
+        if self.status().source != STATE_STANDBY:
             self._send_key(KEY_POWER)
 
 
