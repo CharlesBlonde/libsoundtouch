@@ -4,3 +4,6 @@
 .tox/
 libsoundtouch.egg-info/
 *.pyc
+build/
+dist/
+.cache/

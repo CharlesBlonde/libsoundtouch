@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/CharlesBlonde/libsoundtouch.svg?branch=master)](https://travis-ci.org/CharlesBlonde/libsoundtouch) [![Coverage Status](https://coveralls.io/repos/github/CharlesBlonde/libsoundtouch/badge.svg?branch=master)](https://coveralls.io/github/CharlesBlonde/libsoundtouch?branch=master)
 
-This Python 3.4+ library allows you to control [Bose Soundtouch devices](https://www.soundtouch.com/).
+This Python 2.7+/3.4+ library allows you to control [Bose Soundtouch devices](https://www.soundtouch.com/).
 
 This library has been created in order to create a component for the [Home Assistant](https://home-assistant.io/) project but is totally independent.
 

@@ -5,8 +5,12 @@ from libsoundtouch.device import NoSlavesException, NoExistingZoneException, \
     Preset, Config, SoundTouchDevice
 import logging
 
-from unittest import mock
-from unittest.mock import Mock
+try:
+    from mock import Mock, mock
+except ImportError:
+    from unittest import mock
+    from unittest.mock import Mock
+
 from xml.dom import minidom
 
 

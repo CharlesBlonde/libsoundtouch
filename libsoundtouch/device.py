@@ -28,7 +28,7 @@ STATE_STANDBY = 'STANDBY'
 
 
 def _get_dom_attribute(xml_dom, attribute, default_value=None):
-    if attribute in xml_dom.attributes:
+    if attribute in xml_dom.attributes.keys():
         return xml_dom.attributes[attribute].value
     else:
         return default_value
@@ -38,7 +38,7 @@ def _get_dom_element_attribute(xml_dom, element, attribute,
                                default_value=None):
     element = _get_dom_element(xml_dom, element)
     if element is not None:
-        if attribute in element.attributes:
+        if attribute in element.attributes.keys():
             return element.attributes[attribute].value
         else:
             return None
