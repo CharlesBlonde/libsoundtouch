@@ -14,7 +14,7 @@ pip install libsoundtouch
 ```
 
 ```python
-from libsoundtouch import soundtouch_device
+from libsoundtouch import soundtouch_device, Source
 
 device = soundtouch_device('192.168.1.1')
 device.power_on()
@@ -30,6 +30,11 @@ print(status.artist+ " - "+ status.track)
 device.pause()
 device.next_track()
 device.play()
+
+# Playback Initialisation
+# device.init_play(source, account, location)
+device.init_play(Source.INTERNET_RADIO, '', '4712') -- Studio Brussels
+device.init_play(Source.SPOTIFY, spot_user_id, 'spotify:track:5J59VOgvclrhLDYUoH5OaW') -- Bazart - Goud
 
 # Volume object
 # device.volume() will do an HTTP request. Try to cache this value if needed.
@@ -64,6 +69,7 @@ print(len(zone_status.slaves))
 * repeat one/all/off
 * shuffle on/off
 * select preset (bookmark)
+* playback selected music
 
 ### Multi-room
 
