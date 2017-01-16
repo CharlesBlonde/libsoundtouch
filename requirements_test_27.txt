@@ -5,3 +5,4 @@ pydocstyle>=1.0.0
 pytest>=2.9.2
 pytest-cov>=2.3.1
 mock
+enum>=0.4.6

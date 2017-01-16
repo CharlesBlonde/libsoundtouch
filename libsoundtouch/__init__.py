@@ -1,7 +1,7 @@
 """libsoundtouch."""
 
 from libsoundtouch.device import SoundTouchDevice
-
+from .utils import Key, Source
 
 def soundtouch_device(host, port=8090):
     """Create a new Soundtouch device.
