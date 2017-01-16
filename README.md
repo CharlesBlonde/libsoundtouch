@@ -33,8 +33,11 @@ device.play()
 
 # Playback Initialisation
 # device.init_play(source, account, location)
-device.init_play(Source.INTERNET_RADIO, '', '4712') -- Studio Brussels
-device.init_play(Source.SPOTIFY, spot_user_id, 'spotify:track:5J59VOgvclrhLDYUoH5OaW') -- Bazart - Goud
+device.init_play(Source.INTERNET_RADIO, '', '4712') # Studio Brussel
+spot_user_id = '' # Should be filled in with your Spotify userID
+# This userID can be found by playing Spotify on the connected SoundTouch speaker, and calling
+# device.status().content_item.source_account
+device.init_play(Source.SPOTIFY, spot_user_id, 'spotify:track:5J59VOgvclrhLDYUoH5OaW') # Bazart - Goud
 
 # Volume object
 # device.volume() will do an HTTP request. Try to cache this value if needed.
