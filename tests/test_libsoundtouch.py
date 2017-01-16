@@ -207,32 +207,32 @@ def _mocked_volume(*args, **kwargs):
 
 def _mocked_play(*args, **kwargs):
     if args[0] != "http://192.168.1.1:8090/key" or args[1] not in [
-        '<key state="press" sender="Gabbo">PLAY</key>',
-        '<key state="release" sender="Gabbo">PLAY</key>'
+        '<key state="press" sender="Gabbo">Key.PLAY</key>',
+        '<key state="release" sender="Gabbo">Key.PLAY</key>'
     ]:
         raise Exception("Unknown call")
 
 
 def _mocked_pause(*args, **kwargs):
     if args[0] != "http://192.168.1.1:8090/key" or args[1] not in [
-        '<key state="press" sender="Gabbo">PAUSE</key>',
-        '<key state="release" sender="Gabbo">PAUSE</key>'
+        '<key state="press" sender="Gabbo">Key.PAUSE</key>',
+        '<key state="release" sender="Gabbo">Key.PAUSE</key>'
     ]:
         raise Exception("Unknown call")
 
 
 def _mocked_play_pause(*args, **kwargs):
     if args[0] != "http://192.168.1.1:8090/key" or args[1] not in [
-        '<key state="press" sender="Gabbo">PLAY_PAUSE</key>',
-        '<key state="release" sender="Gabbo">PLAY_PAUSE</key>'
+        '<key state="press" sender="Gabbo">Key.PLAY_PAUSE</key>',
+        '<key state="release" sender="Gabbo">Key.PLAY_PAUSE</key>'
     ]:
         raise Exception("Unknown call")
 
 
 def _mocked_power(*args, **kwargs):
     if args[0] != "http://192.168.1.1:8090/key" or args[1] not in [
-        '<key state="press" sender="Gabbo">POWER</key>',
-        '<key state="release" sender="Gabbo">POWER</key>'
+        '<key state="press" sender="Gabbo">Key.POWER</key>',
+        '<key state="release" sender="Gabbo">Key.POWER</key>'
     ]:
         raise Exception("Unknown call")
 
@@ -246,80 +246,80 @@ def _mocked_set_volume(*args, **kwargs):
 
 def _mocked_volume_up(*args, **kwargs):
     if args[0] != "http://192.168.1.1:8090/key" or args[1] not in [
-        '<key state="press" sender="Gabbo">VOLUME_UP</key>',
-        '<key state="release" sender="Gabbo">VOLUME_UP</key>'
+        '<key state="press" sender="Gabbo">Key.VOLUME_UP</key>',
+        '<key state="release" sender="Gabbo">Key.VOLUME_UP</key>'
     ]:
         raise Exception("Unknown call")
 
 
 def _mocked_volume_down(*args, **kwargs):
     if args[0] != "http://192.168.1.1:8090/key" or args[1] not in [
-        '<key state="press" sender="Gabbo">VOLUME_DOWN</key>',
-        '<key state="release" sender="Gabbo">VOLUME_DOWN</key>'
+        '<key state="press" sender="Gabbo">Key.VOLUME_DOWN</key>',
+        '<key state="release" sender="Gabbo">Key.VOLUME_DOWN</key>'
     ]:
         raise Exception("Unknown call")
 
 
 def _mocked_next_track(*args, **kwargs):
     if args[0] != "http://192.168.1.1:8090/key" or args[1] not in [
-        '<key state="press" sender="Gabbo">NEXT_TRACK</key>',
-        '<key state="release" sender="Gabbo">NEXT_TRACK</key>'
+        '<key state="press" sender="Gabbo">Key.NEXT_TRACK</key>',
+        '<key state="release" sender="Gabbo">Key.NEXT_TRACK</key>'
     ]:
         raise Exception("Unknown call")
 
 
 def _mocked_previous_track(*args, **kwargs):
     if args[0] != "http://192.168.1.1:8090/key" or args[1] not in [
-        '<key state="press" sender="Gabbo">PREV_TRACK</key>',
-        '<key state="release" sender="Gabbo">PREV_TRACK</key>'
+        '<key state="press" sender="Gabbo">Key.PREV_TRACK</key>',
+        '<key state="release" sender="Gabbo">Key.PREV_TRACK</key>'
     ]:
         raise Exception("Unknown call")
 
 
 def _mocked_mute(*args, **kwargs):
     if args[0] != "http://192.168.1.1:8090/key" or args[1] not in [
-        '<key state="press" sender="Gabbo">MUTE</key>',
-        '<key state="release" sender="Gabbo">MUTE</key>'
+        '<key state="press" sender="Gabbo">Key.MUTE</key>',
+        '<key state="release" sender="Gabbo">Key.MUTE</key>'
     ]:
         raise Exception("Unknown call")
 
 
 def _mocked_repeat_one(*args, **kwargs):
     if args[0] != "http://192.168.1.1:8090/key" or args[1] not in [
-        '<key state="press" sender="Gabbo">REPEAT_ONE</key>',
-        '<key state="release" sender="Gabbo">REPEAT_ONE</key>'
+        '<key state="press" sender="Gabbo">Key.REPEAT_ONE</key>',
+        '<key state="release" sender="Gabbo">Key.REPEAT_ONE</key>'
     ]:
         raise Exception("Unknown call")
 
 
 def _mocked_repeat_off(*args, **kwargs):
     if args[0] != "http://192.168.1.1:8090/key" or args[1] not in [
-        '<key state="press" sender="Gabbo">REPEAT_OFF</key>',
-        '<key state="release" sender="Gabbo">REPEAT_OFF</key>'
+        '<key state="press" sender="Gabbo">Key.REPEAT_OFF</key>',
+        '<key state="release" sender="Gabbo">Key.REPEAT_OFF</key>'
     ]:
         raise Exception("Unknown call")
 
 
 def _mocked_repeat_all(*args, **kwargs):
     if args[0] != "http://192.168.1.1:8090/key" or args[1] not in [
-        '<key state="press" sender="Gabbo">REPEAT_ALL</key>',
-        '<key state="release" sender="Gabbo">REPEAT_ALL</key>'
+        '<key state="press" sender="Gabbo">Key.REPEAT_ALL</key>',
+        '<key state="release" sender="Gabbo">Key.REPEAT_ALL</key>'
     ]:
         raise Exception("Unknown call")
 
 
 def _mocked_shuffle_on(*args, **kwargs):
     if args[0] != "http://192.168.1.1:8090/key" or args[1] not in [
-        '<key state="press" sender="Gabbo">SHUFFLE_ON</key>',
-        '<key state="release" sender="Gabbo">SHUFFLE_ON</key>'
+        '<key state="press" sender="Gabbo">Key.SHUFFLE_ON</key>',
+        '<key state="release" sender="Gabbo">Key.SHUFFLE_ON</key>'
     ]:
         raise Exception("Unknown call")
 
 
 def _mocked_shuffle_off(*args, **kwargs):
     if args[0] != "http://192.168.1.1:8090/key" or args[1] not in [
-        '<key state="press" sender="Gabbo">SHUFFLE_OFF</key>',
-        '<key state="release" sender="Gabbo">SHUFFLE_OFF</key>'
+        '<key state="press" sender="Gabbo">Key.SHUFFLE_OFF</key>',
+        '<key state="release" sender="Gabbo">Key.SHUFFLE_OFF</key>'
     ]:
         raise Exception("Unknown call")
 

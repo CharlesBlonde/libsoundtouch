@@ -7,24 +7,11 @@ from xml.dom import minidom
 
 import requests
 
-_LOGGER = logging.getLogger(__name__)
-
-KEY_PLAY = 'PLAY'
-KEY_MUTE = 'MUTE'
-KEY_PAUSE = 'PAUSE'
-KEY_PLAY_PAUSE = 'PLAY_PAUSE'
-KEY_NEXT_TRACK = 'NEXT_TRACK'
-KEY_PREVIOUS_TRACK = 'PREV_TRACK'
-KEY_POWER = 'POWER'
-KEY_VOLUME_UP = 'VOLUME_UP'
-KEY_VOLUME_DOWN = 'VOLUME_DOWN'
-KEY_SHUFFLE_ON = 'SHUFFLE_ON'
-KEY_SHUFFLE_OFF = 'SHUFFLE_OFF'
-KEY_REPEAT_ONE = 'REPEAT_ONE'
-KEY_REPEAT_ALL = 'REPEAT_ALL'
-KEY_REPEAT_OFF = 'REPEAT_OFF'
+from .utils import Key
 
 STATE_STANDBY = 'STANDBY'
+
+_LOGGER = logging.getLogger(__name__)
 
 
 def _get_dom_attribute(xml_dom, attribute, default_value=None):
@@ -214,6 +201,26 @@ class SoundTouchDevice:
         requests.post('http://' + self._host + ":" +
                       str(self._port) + action, release)
 
+    def init_play(self, source, source_acc, location):
+        """
+        Start music playback from a chosen source.
+
+        :param source: Source from which to play. Elements of Source enum.
+        :param source_acc: Source account. Imperative for some sources.
+        For Spotify, this can be found by playing Spotify on the connected
+        SoundTouch speaker, and calling:
+        device.status().content_item.source_account
+        :param location: A unique uri or identifier. Represents the
+        requested music from the source.
+        """
+        action = "/select"
+        play = '<ContentItem source="' + source + '" type="' + \
+               'uri' + '" sourceAccount="' + source_acc + '" location="' +\
+               location + '">' + '<itemName>' + 'Select using API' + \
+               '</itemName>' + '</ContentItem>'
+        requests.post('http://' + self._host + ":" +
+                      str(self._port) + action, play)
+
     @property
     def host(self):
         """Host of the device."""
@@ -274,47 +281,47 @@ class SoundTouchDevice:
 
     def mute(self):
         """Mute/Un-mute volume."""
-        self._send_key(KEY_MUTE)
+        self._send_key(Key.MUTE)
 
     def volume_up(self):
         """Volume up."""
-        self._send_key(KEY_VOLUME_UP)
+        self._send_key(Key.VOLUME_UP)
 
     def volume_down(self):
         """Volume down."""
-        self._send_key(KEY_VOLUME_DOWN)
+        self._send_key(Key.VOLUME_DOWN)
 
     def next_track(self):
         """Switch to next track."""
-        self._send_key(KEY_NEXT_TRACK)
+        self._send_key(Key.NEXT_TRACK)
 
     def previous_track(self):
         """Switch to previous track."""
-        self._send_key(KEY_PREVIOUS_TRACK)
+        self._send_key(Key.PREV_TRACK)
 
     def pause(self):
         """Pause."""
-        self._send_key(KEY_PAUSE)
+        self._send_key(Key.PAUSE)
 
     def play(self):
         """Play."""
-        self._send_key(KEY_PLAY)
+        self._send_key(Key.PLAY)
 
     def play_pause(self):
         """Toggle play status."""
-        self._send_key(KEY_PLAY_PAUSE)
+        self._send_key(Key.PLAY_PAUSE)
 
     def repeat_off(self):
         """Turn off repeat."""
-        self._send_key(KEY_REPEAT_OFF)
+        self._send_key(Key.REPEAT_OFF)
 
     def repeat_one(self):
         """Repeat one. Doesn't work."""
-        self._send_key(KEY_REPEAT_ONE)
+        self._send_key(Key.REPEAT_ONE)
 
     def repeat_all(self):
         """Repeat all."""
-        self._send_key(KEY_REPEAT_ALL)
+        self._send_key(Key.REPEAT_ALL)
 
     def shuffle(self, shuffle):
         """Shuffle on/off.
@@ -322,19 +329,19 @@ class SoundTouchDevice:
         :param shuffle: Boolean on/off
         """
         if shuffle:
-            self._send_key(KEY_SHUFFLE_ON)
+            self._send_key(Key.SHUFFLE_ON)
         else:
-            self._send_key(KEY_SHUFFLE_OFF)
+            self._send_key(Key.SHUFFLE_OFF)
 
     def power_on(self):
         """Power on device."""
         if self.status().source == STATE_STANDBY:
-            self._send_key(KEY_POWER)
+            self._send_key(Key.POWER)
 
     def power_off(self):
         """Power off device."""
         if self.status().source != STATE_STANDBY:
-            self._send_key(KEY_POWER)
+            self._send_key(Key.POWER)
 
 
 class Config:
