@@ -203,7 +203,7 @@ class SoundTouchDevice:
 
     def init_play(self, source, source_acc, location):
         """
-        Playback Initialisation
+        Start music playback from a chosen source.
 
         :param source: Source from which to play. Elements of Source enum.
         :param source_acc: Source account. Imperative for some sources. For Spotify, this can be found by playing Spotify on the connected SoundTouch speaker, and calling: device.status().content_item.source_account
