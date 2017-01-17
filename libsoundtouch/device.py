@@ -7,7 +7,7 @@ from xml.dom import minidom
 
 import requests
 
-from .utils import Key, Source
+from .utils import Key
 
 STATE_STANDBY = 'STANDBY'
 
@@ -206,8 +206,12 @@ class SoundTouchDevice:
         Start music playback from a chosen source.
 
         :param source: Source from which to play. Elements of Source enum.
-        :param source_acc: Source account. Imperative for some sources. For Spotify, this can be found by playing Spotify on the connected SoundTouch speaker, and calling: device.status().content_item.source_account
-        :param location: A unique uri or identifier. Represents the requested music from the source.
+        :param source_acc: Source account. Imperative for some sources.
+        For Spotify, this can be found by playing Spotify on the connected
+        SoundTouch speaker, and calling:
+        device.status().content_item.source_account
+        :param location: A unique uri or identifier. Represents the
+        requested music from the source.
         """
         action = "/select"
         play = '<ContentItem source="' + source + '" type="' + 'uri' + '" sourceAccount="' + source_acc + '" location="' + location + '">' + '<itemName>' + 'Select using API' + '</itemName>' + '</ContentItem>'

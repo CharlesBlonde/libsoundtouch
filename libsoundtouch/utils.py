@@ -2,6 +2,7 @@
 
 from enum import Enum
 
+
 class Key(Enum):
     """Keys of the device."""
 
@@ -33,10 +34,11 @@ class Key(Enum):
     ADD_FAVORITE = 'ADD_FAVORITE'
     REMOVE_FAVORITE = 'REMOVE_FAVORITE'
 
+
 class Source(Enum):
     """Music sources supported by the device."""
 
-    SLAVE_SOURCE ="SLAVE_SOURCE"
+    SLAVE_SOURCE = "SLAVE_SOURCE"
     INTERNET_RADIO = "INTERNET_RADIO"
     PANDORA = "PANDORA"
     AIRPLAY = "AIRPLAY"
@@ -49,3 +51,4 @@ class Source(Enum):
     DEEZER = "DEEZER"
     SPOTIFY = "SPOTIFY"
     IHEART = "IHEART"
+    
