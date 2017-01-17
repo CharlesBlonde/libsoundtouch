@@ -1,8 +1,10 @@
 """Utils for the Bose Soundtouch Device."""
+
 from enum import Enum
 
 class Key(Enum):
     """Keys of the device."""
+
     PLAY = 'PLAY'
     PAUSE = 'PAUSE'
     PLAY_PAUSE = 'PLAY_PAUSE'
@@ -33,6 +35,7 @@ class Key(Enum):
 
 class Source(Enum):
     """Music sources supported by the device."""
+
     SLAVE_SOURCE ="SLAVE_SOURCE"
     INTERNET_RADIO = "INTERNET_RADIO"
     PANDORA = "PANDORA"
