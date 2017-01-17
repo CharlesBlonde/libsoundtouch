@@ -201,9 +201,16 @@ class SoundTouchDevice:
         requests.post('http://' + self._host + ":" +
                       str(self._port) + action, release)
 
-    def init_play(self, source, sourceAcc, location):
+    def init_play(self, source, source_acc, location):
+        """
+        Playback Initialisation
+
+        :param source: Source from which to play. Elements of Source enum.
+        :param source_acc: Source account. Imperative for some sources. For Spotify, this can be found by playing Spotify on the connected SoundTouch speaker, and calling: device.status().content_item.source_account
+        :param location: A unique uri or identifier. Represents the requested music from the source.
+        """
         action = "/select"
-        play = '<ContentItem source="' + source + '" type="' + 'uri' + '" sourceAccount="' + sourceAcc + '" location="' + location + '">' + '<itemName>' + 'Select using API' + '</itemName>' + '</ContentItem>'
+        play = '<ContentItem source="' + source + '" type="' + 'uri' + '" sourceAccount="' + source_acc + '" location="' + location + '">' + '<itemName>' + 'Select using API' + '</itemName>' + '</ContentItem>'
         requests.post('http://' + self._host + ":" +
                       str(self._port) + action, play)
 
