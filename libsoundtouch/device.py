@@ -214,7 +214,10 @@ class SoundTouchDevice:
         requested music from the source.
         """
         action = "/select"
-        play = '<ContentItem source="' + source + '" type="' + 'uri' + '" sourceAccount="' + source_acc + '" location="' + location + '">' + '<itemName>' + 'Select using API' + '</itemName>' + '</ContentItem>'
+        play = '<ContentItem source="' + source + '" type="' + \
+               'uri' + '" sourceAccount="' + source_acc + '" location="' +\
+               location + '">' + '<itemName>' + 'Select using API' + \
+               '</itemName>' + '</ContentItem>'
         requests.post('http://' + self._host + ":" +
                       str(self._port) + action, play)
 

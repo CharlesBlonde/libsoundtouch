@@ -51,4 +51,3 @@ class Source(Enum):
     DEEZER = "DEEZER"
     SPOTIFY = "SPOTIFY"
     IHEART = "IHEART"
-    
