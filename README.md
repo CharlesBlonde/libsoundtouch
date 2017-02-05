@@ -109,3 +109,16 @@ For an unknown reason, the API documentation is not freely available but you can
 You have to sent an email and you'll received a response in a minute with 2 PDF:
 * SoundTouchAPI_Discovery.pdf: How to use SSDP and MDNS discovery protocols
 * SoundTouchAPI_WebServices.pdf: REST API documentation. Be carefull, the documenation contains errors and is not fully up to date
+
+## Changelog
+
+|Version|Date      |Features                 |
+|-------|----------|-------------------------|
+|0.2.0  |2017/02/05|Add *play_media* support |
+|0.1.0  |2016/11/20|Initial release          |
+
+## Contributors
+
+Thanks to:
+
+* [Tyzer34](https://github.com/Tyzer34) (add [play_media](https://github.com/CharlesBlonde/libsoundtouch/blob/master/libsoundtouch/device.py#L204) support)
