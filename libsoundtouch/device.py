@@ -201,23 +201,23 @@ class SoundTouchDevice:
         requests.post('http://' + self._host + ":" +
                       str(self._port) + action, release)
 
-    def init_play(self, source, source_acc, location):
+    def play_media(self, source, location, source_acc=None):
         """
         Start music playback from a chosen source.
 
         :param source: Source from which to play. Elements of Source enum.
+        :param location: A unique uri or identifier. Represents the
+        requested music from the source.
         :param source_acc: Source account. Imperative for some sources.
         For Spotify, this can be found by playing Spotify on the connected
         SoundTouch speaker, and calling:
         device.status().content_item.source_account
-        :param location: A unique uri or identifier. Represents the
-        requested music from the source.
         """
         action = "/select"
-        play = '<ContentItem source="' + source + '" type="' + \
-               'uri' + '" sourceAccount="' + source_acc + '" location="' +\
-               location + '">' + '<itemName>' + 'Select using API' + \
-               '</itemName>' + '</ContentItem>'
+        play = '<ContentItem source="%s" type="uri" sourceAccount="%s" ' \
+               'location="%s"><itemName>Select using API</itemName>' \
+               '</ContentItem>' % (
+                   source.value, source_acc if source_acc else '', location)
         requests.post('http://' + self._host + ":" +
                       str(self._port) + action, play)
 
@@ -281,47 +281,47 @@ class SoundTouchDevice:
 
     def mute(self):
         """Mute/Un-mute volume."""
-        self._send_key(Key.MUTE)
+        self._send_key(Key.MUTE.value)
 
     def volume_up(self):
         """Volume up."""
-        self._send_key(Key.VOLUME_UP)
+        self._send_key(Key.VOLUME_UP.value)
 
     def volume_down(self):
         """Volume down."""
-        self._send_key(Key.VOLUME_DOWN)
+        self._send_key(Key.VOLUME_DOWN.value)
 
     def next_track(self):
         """Switch to next track."""
-        self._send_key(Key.NEXT_TRACK)
+        self._send_key(Key.NEXT_TRACK.value)
 
     def previous_track(self):
         """Switch to previous track."""
-        self._send_key(Key.PREV_TRACK)
+        self._send_key(Key.PREV_TRACK.value)
 
     def pause(self):
         """Pause."""
-        self._send_key(Key.PAUSE)
+        self._send_key(Key.PAUSE.value)
 
     def play(self):
         """Play."""
-        self._send_key(Key.PLAY)
+        self._send_key(Key.PLAY.value)
 
     def play_pause(self):
         """Toggle play status."""
-        self._send_key(Key.PLAY_PAUSE)
+        self._send_key(Key.PLAY_PAUSE.value)
 
     def repeat_off(self):
         """Turn off repeat."""
-        self._send_key(Key.REPEAT_OFF)
+        self._send_key(Key.REPEAT_OFF.value)
 
     def repeat_one(self):
         """Repeat one. Doesn't work."""
-        self._send_key(Key.REPEAT_ONE)
+        self._send_key(Key.REPEAT_ONE.value)
 
     def repeat_all(self):
         """Repeat all."""
-        self._send_key(Key.REPEAT_ALL)
+        self._send_key(Key.REPEAT_ALL.value)
 
     def shuffle(self, shuffle):
         """Shuffle on/off.
@@ -329,19 +329,19 @@ class SoundTouchDevice:
         :param shuffle: Boolean on/off
         """
         if shuffle:
-            self._send_key(Key.SHUFFLE_ON)
+            self._send_key(Key.SHUFFLE_ON.value)
         else:
-            self._send_key(Key.SHUFFLE_OFF)
+            self._send_key(Key.SHUFFLE_OFF.value)
 
     def power_on(self):
         """Power on device."""
         if self.status().source == STATE_STANDBY:
-            self._send_key(Key.POWER)
+            self._send_key(Key.POWER.value)
 
     def power_off(self):
         """Power off device."""
         if self.status().source != STATE_STANDBY:
-            self._send_key(Key.POWER)
+            self._send_key(Key.POWER.value)
 
 
 class Config:
