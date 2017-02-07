@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import unittest
 
 import libsoundtouch
@@ -161,6 +163,32 @@ def _mocked_status_radio(*args, **kwargs):
     </art>
     <playStatus>PLAY_STATE</playStatus>
     <description>MP3 64 kbps Paris France, Radio du sport</description>
+    <stationLocation>Paris France</stationLocation>
+</nowPlaying>""")
+
+
+def _mocked_status_radio_non_ascii(*args, ** kwargs):
+    return MockResponse(u"""<?xml version="1.0" encoding="UTF-8" ?>
+<nowPlaying deviceID="689E198DDB3A" source="INTERNET_RADIO">
+    <ContentItem source="INTERNET_RADIO" location="1307" sourceAccount=""
+                    isPresetable="true">
+        <itemName>France Info</itemName>
+        <containerArt>
+            http://item.radio456.com/007452/logo/logo-1307.jpg
+        </containerArt>
+    </ContentItem>
+    <track></track>
+    <artist></artist>
+    <album></album>
+    <stationName>France Info</stationName>
+    <art artImageStatus="IMAGE_PRESENT">
+        http://item.radio456.com/007452/logo/logo-1307.jpg
+    </art>
+    <playStatus>PLAY_STATE</playStatus>
+    <description>MP3  64 kbps  Paris France,  La radio franceinfo vous propose
+        à tout moment une information complète, des reportages,
+        et des émissions d'actualité.
+    </description>
     <stationLocation>Paris France</stationLocation>
 </nowPlaying>""")
 
@@ -556,6 +584,24 @@ class TestLibSoundTouch(unittest.TestCase):
         self.assertEqual(status.station_name, "RMC Info Talk Sport")
         self.assertEqual(status.description,
                          "MP3 64 kbps Paris France, Radio du sport")
+        self.assertEqual(status.station_location, "Paris France")
+
+    @mock.patch('requests.get', side_effect=_mocked_status_radio_non_ascii)
+    def test_status_radio_non_ascii(self, mocked_device_status):
+        device = MockDevice("192.168.1.1")
+        status = device.status()
+        self.assertEqual(mocked_device_status.call_count, 1)
+        self.assertEqual(status.source, "INTERNET_RADIO")
+        self.assertEqual(status.content_item.source, "INTERNET_RADIO")
+        self.assertEqual(status.content_item.location, "1307")
+        self.assertEqual(status.content_item.source_account, "")
+        self.assertEqual(status.content_item.is_presetable, True)
+        self.assertIsNone(status.track)
+        self.assertIsNone(status.artist)
+        self.assertIsNone(status.album)
+        self.assertEqual(status.image,
+                         "http://item.radio456.com/007452/logo/logo-1307.jpg")
+        self.assertEqual(status.station_name, "France Info")
         self.assertEqual(status.station_location, "Paris France")
 
     @mock.patch('requests.get', side_effect=_mocked_status_stored_music)
