@@ -112,11 +112,12 @@ You have to sent an email and you'll received a response in a minute with 2 PDF:
 
 ## Changelog
 
-|Version|Date      |Features                 |
-|-------|----------|-------------------------|
-|0.2.1  |2017/02/05|Fix dependencies         |
-|0.2.0  |2017/02/05|Add *play_media* support |
-|0.1.0  |2016/11/20|Initial release          |
+| Version |    Date    | Features                                           |
+|---------|:----------:|----------------------------------------------------|
+| 0.2.2   | 2017/02/07 | Fix status with non ascii characters in Python 2.7 |
+| 0.2.1   | 2017/02/05 | Fix dependencies                                   |
+| 0.2.0   | 2017/02/05 | Add *play_media* support                           |
+| 0.1.0   | 2016/11/20 | Initial release                                    |
 
 ## Contributors
 

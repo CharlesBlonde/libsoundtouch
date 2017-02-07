@@ -19,7 +19,7 @@ PROJECT_CLASSIFIERS = [
 
 setup(
     name="libsoundtouch",
-    version="0.2.1",
+    version="0.2.2",
     license="Apache License 2.0",
     url="https://github.com/CharlesBlonde/libsoundtouch",
     download_url="https://github.com/CharlesBlonde/libsoundtouch",
