@@ -5,7 +5,7 @@ import unittest
 import libsoundtouch
 from libsoundtouch.device import NoSlavesException, NoExistingZoneException, \
     Preset, Config, SoundTouchDevice
-from libsoundtouch.utils import Source
+from libsoundtouch.utils import Source, Type
 import logging
 
 try:
@@ -256,6 +256,15 @@ def _mocked_play_media_with_account(*args, **kwargs):
                     args[1] != '<ContentItem source="SPOTIFY" type="uri" ' \
                                'sourceAccount="spot_user_id" ' \
                                'location="uri_track"><itemName>' \
+                               'Select using API</itemName></ContentItem>':
+        raise Exception("Unknown call")
+
+
+def _mocked_play_media_with_type(*args, **kwargs):
+    if args[0] != "http://192.168.1.1:8090/select" or \
+                    args[1] != '<ContentItem source="LOCAL_MUSIC" ' \
+                               'type="album" sourceAccount="account_id" ' \
+                               'location="album:1"><itemName>' \
                                'Select using API</itemName></ContentItem>':
         raise Exception("Unknown call")
 
@@ -648,6 +657,13 @@ class TestLibSoundTouch(unittest.TestCase):
     def test_play_media_with_account(self, mocked_play_media):
         device = MockDevice("192.168.1.1")
         device.play_media(Source.SPOTIFY, "uri_track", "spot_user_id")
+        self.assertEqual(mocked_play_media.call_count, 1)
+
+    @mock.patch('requests.post', side_effect=_mocked_play_media_with_type)
+    def test_play_media_with_type(self, mocked_play_media):
+        device = MockDevice("192.168.1.1")
+        device.play_media(Source.LOCAL_MUSIC, "album:1", "account_id",
+                          Type.ALBUM)
         self.assertEqual(mocked_play_media.call_count, 1)
 
     @mock.patch('requests.post', side_effect=_mocked_pause)

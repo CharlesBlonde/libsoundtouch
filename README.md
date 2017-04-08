@@ -15,7 +15,7 @@ pip install libsoundtouch
 
 ```python
 from libsoundtouch import soundtouch_device
-from libsoundtouch.utils import Source
+from libsoundtouch.utils import Source, Type
 
 device = soundtouch_device('192.168.1.1')
 device.power_on()
@@ -33,12 +33,17 @@ device.next_track()
 device.play()
 
 # Media Playback
-# device.play_media(source, location, account) #account is optional
+# device.play_media(source, location, account, media_type) #account and media_type are optionals
 device.play_media(Source.INTERNET_RADIO, '4712') # Studio Brussel
 spot_user_id = '' # Should be filled in with your Spotify userID
 # This userID can be found by playing Spotify on the connected SoundTouch speaker, and calling
 # device.status().content_item.source_account
 device.play_media(Source.SPOTIFY, 'spotify:track:5J59VOgvclrhLDYUoH5OaW', spot_user_id) # Bazart - Goud
+# Local music (Windows media player, Itunes)
+# Account ID can be found by playing local music on the connected Soundtouch speaker, and calling
+# device.status().content_item.source_account
+account_id = device.status().content_item.source_account
+device.play_media(Source.LOCAL_MUSIC, 'album:1', account_id, Type.ALBUM)
 
 # Volume object
 # device.volume() will do an HTTP request. Try to cache this value if needed.
@@ -108,7 +113,7 @@ The following features are not yet implemented:
 For an unknown reason, the API documentation is not freely available but you can request to get it: http://developers.bose.com/.
 You have to sent an email and you'll received a response in a minute with 2 PDF:
 * SoundTouchAPI_Discovery.pdf: How to use SSDP and MDNS discovery protocols
-* SoundTouchAPI_WebServices.pdf: REST API documentation. Be carefull, the documenation contains errors and is not fully up to date
+* SoundTouchAPI_WebServices.pdf: REST API documentation. Be careful, the documentation contains errors and is not fully up to date
 
 ## Changelog
 

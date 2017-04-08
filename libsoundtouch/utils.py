@@ -51,3 +51,18 @@ class Source(Enum):
     DEEZER = "DEEZER"
     SPOTIFY = "SPOTIFY"
     IHEART = "IHEART"
+    LOCAL_MUSIC = "LOCAL_MUSIC"
+
+
+class Type(Enum):
+    """Music types.
+
+    URI for streaming (Spotify, NAS, etc)
+    TRACK/ALBUM/PLAYLIST for music libraries on computer (Windows media player,
+    Itunes)
+    """
+
+    URI = "uri"
+    TRACK = "track"
+    ALBUM = "album"
+    PLAYLIST = "playlist"

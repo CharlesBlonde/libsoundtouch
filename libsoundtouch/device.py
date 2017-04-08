@@ -7,7 +7,7 @@ from xml.dom import minidom
 
 import requests
 
-from .utils import Key
+from .utils import Key, Type
 
 STATE_STANDBY = 'STANDBY'
 
@@ -201,7 +201,8 @@ class SoundTouchDevice:
         requests.post('http://' + self._host + ":" +
                       str(self._port) + action, release)
 
-    def play_media(self, source, location, source_acc=None, type="uri"):
+    def play_media(self, source, location, source_acc=None,
+                   media_type=Type.URI):
         """
         Start music playback from a chosen source.
 
@@ -212,15 +213,16 @@ class SoundTouchDevice:
         For Spotify, this can be found by playing Spotify on the connected
         SoundTouch speaker, and calling:
         device.status().content_item.source_account
-        :param type: Type of the requested music. Typical values are: "uri",
-        "track", "album", "playlist". This can be found in
+        :param media_type: Type of the requested music. Typical values are:
+        "uri", "track", "album", "playlist". This can be found in
         device.status().content_item.type
         """
         action = "/select"
         play = '<ContentItem source="%s" type="%s" sourceAccount="%s" ' \
                'location="%s"><itemName>Select using API</itemName>' \
                '</ContentItem>' % (
-                   source.value, type, source_acc if source_acc else '', location)
+                   source.value, media_type.value,
+                   source_acc if source_acc else '', location)
         requests.post('http://' + self._host + ":" +
                       str(self._port) + action, play)
 
