@@ -7,3 +7,4 @@ libsoundtouch.egg-info/
 build/
 dist/
 .cache/
+runtime/*
