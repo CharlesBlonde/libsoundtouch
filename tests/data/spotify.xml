@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<nowPlaying deviceID="11223344" source="SPOTIFY"
+            sourceAccount="spotify_account">
+    <ContentItem source="SPOTIFY" type="uri"
+                 location="spotify:artist:2ye2Wgw4gimLv2eAKyk1NB"
+                 sourceAccount="spotify_account" isPresetable="true">
+        <itemName>Metallica</itemName>
+    </ContentItem>
+    <track>Nothing Else Matters (Live)</track>
+    <artist>Metallica</artist>
+    <album>Metallica Through The Never (Music from the Motion Picture)</album>
+    <art artImageStatus="IMAGE_PRESENT">
+        http://i.scdn.co/image/1362a06f43
+    </art>
+    <time total="441">402</time>
+    <skipEnabled/>
+    <favoriteEnabled/>
+    <playStatus>PLAY_STATE</playStatus>
+    <shuffleSetting>SHUFFLE_OFF</shuffleSetting>
+    <repeatSetting>REPEAT_OFF</repeatSetting>
+    <skipPreviousEnabled/>
+    <streamType>TRACK_ONDEMAND</streamType>
+    <trackID>spotify:track:1HoBsGG0Ss2Wv5Ky8pkCEf</trackID>
+</nowPlaying>

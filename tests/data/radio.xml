@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<nowPlaying deviceID="11223344" source="INTERNET_RADIO">
+    <ContentItem source="INTERNET_RADIO" location="21630" sourceAccount=""
+                 isPresetable="true">
+        <itemName>RMC Info Talk Sport</itemName>
+    </ContentItem>
+    <track></track>
+    <artist></artist>
+    <album></album>
+    <stationName>RMC Info Talk Sport</stationName>
+    <art artImageStatus="IMAGE_PRESENT">
+        http://item.radio456.com/007452/logo/logo-21630.jpg
+    </art>
+    <playStatus>PLAY_STATE</playStatus>
+    <description>MP3 64 kbps Paris France, Radio du sport</description>
+    <stationLocation>Paris France</stationLocation>
+</nowPlaying>

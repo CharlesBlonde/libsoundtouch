@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<nowPlaying deviceID="11223344" source="STORED_MUSIC"
+            sourceAccount="00113222-aab9-0011-b9aa-b9aa22321100/0">
+    <ContentItem source="STORED_MUSIC" location="27$2745"
+                 sourceAccount="00113222-aab9-0011-b9aa-b9aa22321100/0"
+                 isPresetable="true">
+        <itemName>Limp Bizkit</itemName>
+    </ContentItem>
+    <track>Break Stuff</track>
+    <artist>Limp Bizkit</artist>
+    <album>Significant Other</album>
+    <offset>2</offset>
+    <art artImageStatus="SHOW_DEFAULT_IMAGE"/>
+    <time total="166">77</time>
+    <skipEnabled/>
+    <playStatus>PLAY_STATE</playStatus>
+    <shuffleSetting>SHUFFLE_OFF</shuffleSetting>
+    <repeatSetting>REPEAT_OFF</repeatSetting>
+    <skipPreviousEnabled/>
+</nowPlaying>

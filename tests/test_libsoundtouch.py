@@ -7,6 +7,7 @@ from libsoundtouch.device import NoSlavesException, NoExistingZoneException, \
     Preset, Config, SoundTouchDevice
 from libsoundtouch.utils import Source, Type
 import logging
+import codecs
 
 try:
     from mock import Mock, mock
@@ -15,14 +16,17 @@ except ImportError:
     from unittest.mock import Mock
 
 from xml.dom import minidom
+from requests.models import Response
 
 
-class MockResponse:
+class MockResponse(Response):
     """Mock Soundtouch XML response."""
 
     def __init__(self, text):
         """Create new XML response."""
-        self.text = text
+
+        self._content = text.encode('utf-8')
+        self.encoding = None
 
 
 class MockDevice(SoundTouchDevice):
@@ -121,99 +125,29 @@ def _mocked_device_info_without_values(*args, **kwargs):
 
 def _mocked_status_spotify(*args, **kwargs):
     if args[0] == 'http://192.168.1.1:8090/now_playing':
-        return MockResponse("""<?xml version="1.0" encoding="UTF-8" ?>
-<nowPlaying deviceID="11223344" source="SPOTIFY"
-            sourceAccount="spotify_account">
-    <ContentItem source="SPOTIFY" type="uri"
-                 location="spotify:artist:2ye2Wgw4gimLv2eAKyk1NB"
-                 sourceAccount="spotify_account" isPresetable="true">
-        <itemName>Metallica</itemName>
-    </ContentItem>
-    <track>Nothing Else Matters (Live)</track>
-    <artist>Metallica</artist>
-    <album>Metallica Through The Never (Music from the Motion Picture)</album>
-    <art artImageStatus="IMAGE_PRESENT">
-        http://i.scdn.co/image/1362a06f43
-    </art>
-    <time total="441">402</time>
-    <skipEnabled/>
-    <favoriteEnabled/>
-    <playStatus>PLAY_STATE</playStatus>
-    <shuffleSetting>SHUFFLE_OFF</shuffleSetting>
-    <repeatSetting>REPEAT_OFF</repeatSetting>
-    <skipPreviousEnabled/>
-    <streamType>TRACK_ONDEMAND</streamType>
-    <trackID>spotify:track:1HoBsGG0Ss2Wv5Ky8pkCEf</trackID>
-</nowPlaying>""")
+        return MockResponse(
+            codecs.open("tests/data/spotify.xml", "r", "utf-8").read())
+
+
+def _mocked_status_spotify_utf8(*args, **kwargs):
+    if args[0] == 'http://192.168.1.1:8090/now_playing':
+        return MockResponse(
+            codecs.open("tests/data/spotify_utf8.xml", "r", "utf-8").read())
 
 
 def _mocked_status_radio(*args, **kwargs):
-    return MockResponse("""<?xml version="1.0" encoding="UTF-8" ?>
-<nowPlaying deviceID="11223344" source="INTERNET_RADIO">
-    <ContentItem source="INTERNET_RADIO" location="21630" sourceAccount=""
-                 isPresetable="true">
-        <itemName>RMC Info Talk Sport</itemName>
-    </ContentItem>
-    <track></track>
-    <artist></artist>
-    <album></album>
-    <stationName>RMC Info Talk Sport</stationName>
-    <art artImageStatus="IMAGE_PRESENT">
-        http://item.radio456.com/007452/logo/logo-21630.jpg
-    </art>
-    <playStatus>PLAY_STATE</playStatus>
-    <description>MP3 64 kbps Paris France, Radio du sport</description>
-    <stationLocation>Paris France</stationLocation>
-</nowPlaying>""")
+    return MockResponse(
+        codecs.open("tests/data/radio.xml", "r", "utf-8").read())
 
 
 def _mocked_status_radio_non_ascii(*args, ** kwargs):
-    return MockResponse(u"""<?xml version="1.0" encoding="UTF-8" ?>
-<nowPlaying deviceID="689E198DDB3A" source="INTERNET_RADIO">
-    <ContentItem source="INTERNET_RADIO" location="1307" sourceAccount=""
-                    isPresetable="true">
-        <itemName>France Info</itemName>
-        <containerArt>
-            http://item.radio456.com/007452/logo/logo-1307.jpg
-        </containerArt>
-    </ContentItem>
-    <track></track>
-    <artist></artist>
-    <album></album>
-    <stationName>France Info</stationName>
-    <art artImageStatus="IMAGE_PRESENT">
-        http://item.radio456.com/007452/logo/logo-1307.jpg
-    </art>
-    <playStatus>PLAY_STATE</playStatus>
-    <description>MP3  64 kbps  Paris France,  La radio franceinfo vous propose
-        à tout moment une information complète, des reportages,
-        et des émissions d'actualité.
-    </description>
-    <stationLocation>Paris France</stationLocation>
-</nowPlaying>""")
+    return MockResponse(
+        codecs.open("tests/data/radio_utf8.xml", "r", "utf-8").read())
 
 
 def _mocked_status_stored_music(*args, **kwargs):
-    return MockResponse("""<?xml version="1.0" encoding="UTF-8" ?>
-<nowPlaying deviceID="11223344" source="STORED_MUSIC"
-            sourceAccount="00113222-aab9-0011-b9aa-b9aa22321100/0">
-    <ContentItem source="STORED_MUSIC" location="27$2745"
-                 sourceAccount="00113222-aab9-0011-b9aa-b9aa22321100/0"
-                 isPresetable="true">
-        <itemName>Limp Bizkit</itemName>
-    </ContentItem>
-    <track>Break Stuff</track>
-    <artist>Limp Bizkit</artist>
-    <album>Significant Other</album>
-    <offset>2</offset>
-    <art artImageStatus="SHOW_DEFAULT_IMAGE"/>
-    <time total="166">77</time>
-    <skipEnabled/>
-    <playStatus>PLAY_STATE</playStatus>
-    <shuffleSetting>SHUFFLE_OFF</shuffleSetting>
-    <repeatSetting>REPEAT_OFF</repeatSetting>
-    <skipPreviousEnabled/>
-</nowPlaying>""")
+    return MockResponse(
+        codecs.open("tests/data/stored_music.xml", "r", "utf-8").read())
 
 
 def _mocked_status_standby(*args, **kwargs):
@@ -574,6 +508,14 @@ class TestLibSoundTouch(unittest.TestCase):
         self.assertEqual(device.status(refresh=False).content_item.name,
                          "Metallica")
         self.assertEqual(mocked_device_status.call_count, 3)
+
+    @mock.patch('requests.get', side_effect=_mocked_status_spotify_utf8)
+    def test_status_spotify_utf8(self, mocked_device_status):
+        device = MockDevice("192.168.1.1")
+        status = device.status()
+        self.assertEqual(status.source, "SPOTIFY")
+        self.assertEqual(status.track, u'Música Urbana')
+        self.assertEqual(mocked_device_status.call_count, 1)
 
     @mock.patch('requests.get', side_effect=_mocked_status_radio)
     def test_status_radio(self, mocked_device_status):

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<nowPlaying deviceID="689E198DDB3A" source="INTERNET_RADIO">
+    <ContentItem source="INTERNET_RADIO" location="1307" sourceAccount=""
+                 isPresetable="true">
+        <itemName>France Info</itemName>
+        <containerArt>
+            http://item.radio456.com/007452/logo/logo-1307.jpg
+        </containerArt>
+    </ContentItem>
+    <track></track>
+    <artist></artist>
+    <album></album>
+    <stationName>France Info</stationName>
+    <art artImageStatus="IMAGE_PRESENT">
+        http://item.radio456.com/007452/logo/logo-1307.jpg
+    </art>
+    <playStatus>PLAY_STATE</playStatus>
+    <description>MP3  64 kbps  Paris France,  La radio franceinfo vous propose
+        à tout moment une information complète, des reportages,
+        et des émissions d'actualité.
+    </description>
+    <stationLocation>Paris France</stationLocation>
+</nowPlaying>

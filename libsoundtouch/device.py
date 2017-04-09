@@ -81,6 +81,7 @@ class SoundTouchDevice:
         """Refresh status state."""
         response = requests.get(
             "http://" + self._host + ":" + str(self._port) + "/now_playing")
+        response.encoding = 'UTF-8'
         dom = minidom.parseString(response.text.encode('utf-8'))
         self._status = Status(dom)
 

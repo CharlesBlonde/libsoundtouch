@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<nowPlaying deviceID="11223344" source="SPOTIFY" sourceAccount="spot_account">
+    <ContentItem source="SPOTIFY" type="uri"
+                 location="spotify:artist:4Z0yuwHVJBROVZqFpTIr0d"
+                 sourceAccount="spotify_acount" isPresetable="true">
+        <itemName>Capital Inicial</itemName>
+    </ContentItem>
+    <track>Música Urbana</track>
+    <artist>Capital Inicial</artist>
+    <album>Millennium - Capital Inicial</album>
+    <art artImageStatus="IMAGE_PRESENT">http://url</art>
+    <time total="210">44</time>
+    <skipEnabled/>
+    <playStatus>PAUSE_STATE</playStatus>
+    <shuffleSetting>SHUFFLE_ON</shuffleSetting>
+    <repeatSetting>REPEAT_OFF</repeatSetting>
+    <skipPreviousEnabled/>
+    <streamType>TRACK_ONDEMAND</streamType>
+    <trackID>spotify:track:XXX</trackID>
+</nowPlaying>
