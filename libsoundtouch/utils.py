@@ -52,6 +52,7 @@ class Source(Enum):
     SPOTIFY = "SPOTIFY"
     IHEART = "IHEART"
     LOCAL_MUSIC = "LOCAL_MUSIC"
+    BLUETOOTH = "BLUETOOTH"
 
 
 class Type(Enum):
