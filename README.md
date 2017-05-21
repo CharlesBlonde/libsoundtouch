@@ -119,6 +119,7 @@ You have to sent an email and you'll received a response in a minute with 2 PDF:
 
 | Version |    Date    | Features                                                                   |
 |---------|:----------:|----------------------------------------------------------------------------|
+| 0.4.0   | 2017/05/21 | Add Bluetooth source                                                       |
 | 0.3.0   | 2017/04/09 | Allow playing local computer media and fix issue with non ASCII characters |
 | 0.2.2   | 2017/02/07 | Fix status with non ascii characters in Python 2.7                         |
 | 0.2.1   | 2017/02/05 | Fix dependencies                                                           |
@@ -129,6 +130,7 @@ You have to sent an email and you'll received a response in a minute with 2 PDF:
 
 Thanks to:
 
-* [Tyzer34](https://github.com/Tyzer34) (add [play_media](https://github.com/CharlesBlonde/libsoundtouch/blob/master/libsoundtouch/device.py#L204) support)
+* [Tyzer34](https://github.com/Tyzer34) (add *play_media* support)
 * [wanderor](https://github.com/wanderor) (add local computer media support)
+* [obadz](https://github.com/obadz) (add Bluetooth source)
 
