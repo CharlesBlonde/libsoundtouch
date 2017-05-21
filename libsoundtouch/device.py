@@ -1,6 +1,7 @@
 """Bose Soundtouch Device."""
 
-# pylint: disable=too-many-public-methods,too-many-instance-attributes
+# pylint: disable=too-many-public-methods,too-many-instance-attributes,
+# pylint: disable=useless-super-delegation
 
 import logging
 from xml.dom import minidom
@@ -17,8 +18,7 @@ _LOGGER = logging.getLogger(__name__)
 def _get_dom_attribute(xml_dom, attribute, default_value=None):
     if attribute in xml_dom.attributes.keys():
         return xml_dom.attributes[attribute].value
-    else:
-        return default_value
+    return default_value
 
 
 def _get_dom_element_attribute(xml_dom, element, attribute,
@@ -27,8 +27,7 @@ def _get_dom_element_attribute(xml_dom, element, attribute,
     if element is not None:
         if attribute in element.attributes.keys():
             return element.attributes[attribute].value
-        else:
-            return None
+        return None
     else:
         return default_value
 
@@ -39,18 +38,16 @@ def _get_dom_elements(xml_dom, element):
 
 def _get_dom_element(xml_dom, element):
     elements = _get_dom_elements(xml_dom, element)
-    if len(elements) > 0:
+    if elements:
         return elements[0]
-    else:
-        return None
+    return None
 
 
 def _get_dom_element_value(xml_dom, element, default_value=None):
     element = _get_dom_element(xml_dom, element)
     if element is not None and element.firstChild is not None:
         return element.firstChild.nodeValue.strip()
-    else:
-        return default_value
+    return default_value
 
 
 class SoundTouchDevice:
@@ -106,7 +103,7 @@ class SoundTouchDevice:
         response = requests.get(
             "http://" + self._host + ":" + str(self._port) + "/getZone")
         dom = minidom.parseString(response.text)
-        if len(_get_dom_elements(dom, "member")) != 0:
+        if _get_dom_elements(dom, "member"):
             self._zone_status = ZoneStatus(dom)
         else:
             self._zone_status = None
@@ -234,7 +231,7 @@ class SoundTouchDevice:
 
     @property
     def port(self):
-        """API port of the device."""
+        """Return API port of the device."""
         return self._port
 
     @property
@@ -408,7 +405,7 @@ class Config:
 
     @property
     def module_type(self):
-        """Module type."""
+        """Return module type."""
         return self._module_type
 
     @property
@@ -503,7 +500,7 @@ class Component:
 
     @property
     def serial_number(self):
-        """Serial number."""
+        """Return serial number."""
         return self._serial_number
 
 
@@ -668,7 +665,7 @@ class ContentItem:
 
     @property
     def is_presetable(self):
-        """True if presetable."""
+        """Return true if presetable."""
         return self._is_presetable
 
 
@@ -696,7 +693,7 @@ class Volume:
 
     @property
     def muted(self):
-        """True if volume is muted."""
+        """Return True if volume is muted."""
         return self._muted
 
 
@@ -757,7 +754,7 @@ class Preset:
 
     @property
     def is_presetable(self):
-        """True if is presetable."""
+        """Return True if is presetable."""
         return self._is_presetable
 
     @property
@@ -791,7 +788,7 @@ class ZoneStatus:
 
     @property
     def is_master(self):
-        """True if current device is the zone master."""
+        """Return True if current device is the zone master."""
         return self._is_master
 
     @property
