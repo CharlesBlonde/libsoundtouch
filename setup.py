@@ -5,7 +5,8 @@ PACKAGES = find_packages(exclude=['tests', 'tests.*'])
 
 REQUIRES = [
     'requests>=2,<3',
-    'enum34>=1.1.6'
+    'enum34>=1.1.6',
+    'websocket-client>=0.40.0'
 ]
 
 PROJECT_CLASSIFIERS = [

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import unittest
+import time
 
 import libsoundtouch
 from libsoundtouch.device import NoSlavesException, NoExistingZoneException, \
@@ -38,6 +39,12 @@ class MockDevice(SoundTouchDevice):
         self._status = None
         self._volume = None
         self._presets = None
+        self._ws_port = 8080
+        self._volume_updated_listeners = []
+        self._status_updated_listeners = []
+        self._presets_updated_listeners = []
+        self._zone_status_updated_listeners = []
+        self._device_info_updated_listeners = []
 
     def set_base_config(self, ip, id):
         xml = """<?xml version="1.0" encoding="UTF-8" ?>
@@ -125,29 +132,44 @@ def _mocked_device_info_without_values(*args, **kwargs):
 
 def _mocked_status_spotify(*args, **kwargs):
     if args[0] == 'http://192.168.1.1:8090/now_playing':
-        return MockResponse(
-            codecs.open("tests/data/spotify.xml", "r", "utf-8").read())
+        codecs_open = codecs.open("tests/data/spotify.xml", "r", "utf-8")
+        try:
+            return MockResponse(codecs_open.read())
+        finally:
+            codecs_open.close()
 
 
 def _mocked_status_spotify_utf8(*args, **kwargs):
     if args[0] == 'http://192.168.1.1:8090/now_playing':
-        return MockResponse(
-            codecs.open("tests/data/spotify_utf8.xml", "r", "utf-8").read())
+        codecs_open = codecs.open("tests/data/spotify_utf8.xml", "r", "utf-8")
+        try:
+            return MockResponse(codecs_open.read())
+        finally:
+            codecs_open.close()
 
 
 def _mocked_status_radio(*args, **kwargs):
-    return MockResponse(
-        codecs.open("tests/data/radio.xml", "r", "utf-8").read())
+    codecs_open = codecs.open("tests/data/radio.xml", "r", "utf-8")
+    try:
+        return MockResponse(codecs_open.read())
+    finally:
+        codecs_open.close()
 
 
-def _mocked_status_radio_non_ascii(*args, ** kwargs):
-    return MockResponse(
-        codecs.open("tests/data/radio_utf8.xml", "r", "utf-8").read())
+def _mocked_status_radio_non_ascii(*args, **kwargs):
+    codecs_open = codecs.open("tests/data/radio_utf8.xml", "r", "utf-8")
+    try:
+        return MockResponse(codecs_open.read())
+    finally:
+        codecs_open.close()
 
 
 def _mocked_status_stored_music(*args, **kwargs):
-    return MockResponse(
-        codecs.open("tests/data/stored_music.xml", "r", "utf-8").read())
+    codecs_open = codecs.open("tests/data/stored_music.xml", "r", "utf-8")
+    try:
+        return MockResponse(codecs_open.read())
+    finally:
+        codecs_open.close()
 
 
 def _mocked_status_standby(*args, **kwargs):
@@ -849,3 +871,160 @@ class TestLibSoundTouch(unittest.TestCase):
         self.assertRaises(NoExistingZoneException,
                           device.add_zone_slave, [])
         self.assertEqual(mocked_zone_status.call_count, 1)
+
+    @mock.patch('websocket.WebSocketApp.run_forever')
+    def test_ws_start(self, ws_run_forever):
+        device = MockDevice("192.168.1.1")
+        device.start_notification()
+        time.sleep(1)  # Wait thread start
+        self.assertEqual(ws_run_forever.call_count, 1)
+
+    def test_ws_listeners(self):
+        device = MockDevice("192.168.1.1")
+
+        def listener_1():
+            pass
+
+        def listener_2():
+            pass
+
+        device.add_volume_listener(listener_1)
+        device.add_volume_listener(listener_2)
+        self.assertEqual(len(device.volume_updated_listeners), 2)
+        device.remove_volume_listener(listener_2)
+        self.assertEqual(len(device.volume_updated_listeners), 1)
+        device.clear_volume_listeners()
+        self.assertEqual(len(device.volume_updated_listeners), 0)
+
+        device.add_status_listener(listener_1)
+        device.add_status_listener(listener_2)
+        self.assertEqual(len(device.status_updated_listeners), 2)
+        device.remove_status_listener(listener_2)
+        self.assertEqual(len(device.status_updated_listeners), 1)
+        device.clear_status_listener()
+        self.assertEqual(len(device.status_updated_listeners), 0)
+
+        device.add_presets_listener(listener_1)
+        device.add_presets_listener(listener_2)
+        self.assertEqual(len(device.presets_updated_listeners), 2)
+        device.remove_presets_listener(listener_2)
+        self.assertEqual(len(device.presets_updated_listeners), 1)
+        device.clear_presets_listeners()
+        self.assertEqual(len(device.presets_updated_listeners), 0)
+
+        device.add_zone_status_listener(listener_1)
+        device.add_zone_status_listener(listener_2)
+        self.assertEqual(len(device.zone_status_updated_listeners), 2)
+        device.remove_zone_status_listener(listener_2)
+        self.assertEqual(len(device.zone_status_updated_listeners), 1)
+        device.clear_zone_status_listeners()
+        self.assertEqual(len(device.zone_status_updated_listeners), 0)
+
+        device.add_device_info_listener(listener_1)
+        device.add_device_info_listener(listener_2)
+        self.assertEqual(len(device.device_info_updated_listeners), 2)
+        device.remove_device_info_listener(listener_2)
+        self.assertEqual(len(device.device_info_updated_listeners), 1)
+        device.clear_device_info_listeners()
+        self.assertEqual(len(device.device_info_updated_listeners), 0)
+
+    def test_ws_status_notification(self):
+        device = MockDevice("192.168.1.1")
+        self.listener_called = False
+        self.status = None
+
+        def listener(status_msg):
+            self.listener_called = True
+            self.status = status_msg
+
+        device.add_status_listener(listener)
+        codecs_open = codecs.open("tests/data/ws_status.xml", "r", "utf-8")
+        try:
+            content = codecs_open.read()
+            device._on_message(None, content)
+            self.assertTrue(self.listener_called)
+            self.assertEqual(self.status.track, "Devil We Know")
+        finally:
+            codecs_open.close()
+
+    def test_ws_volume_notification(self):
+        device = MockDevice("192.168.1.1")
+        self.listener_called = False
+        self.volume = None
+
+        def listener(status_msg):
+            self.listener_called = True
+            self.volume = status_msg
+
+        device.add_volume_listener(listener)
+        codecs_open = codecs.open("tests/data/ws_volume.xml", "r", "utf-8")
+        try:
+            content = codecs_open.read()
+            device._on_message(None, content)
+            self.assertTrue(self.listener_called)
+            self.assertEqual(self.volume.actual, 21)
+        finally:
+            codecs_open.close()
+
+    def test_ws_presets_notification(self):
+        device = MockDevice("192.168.1.1")
+        self.listener_called = False
+        self.presets = None
+
+        def listener(status_msg):
+            self.listener_called = True
+            self.presets = status_msg
+
+        device.add_presets_listener(listener)
+        codecs_open = codecs.open("tests/data/ws_presets.xml", "r", "utf-8")
+        try:
+            content = codecs_open.read()
+            device._on_message(None, content)
+            self.assertTrue(self.listener_called)
+            self.assertEqual(len(self.presets), 3)
+            self.assertEqual(self.presets[0].name, "Zedd")
+        finally:
+            codecs_open.close()
+
+    @mock.patch('requests.get', side_effect=_mocked_zone_status_master)
+    def test_ws_zone_notification(self, mocked_zone_status):
+        device = MockDevice("192.168.1.1")
+        self.listener_called = False
+        self.zone = None
+
+        def listener(status_msg):
+            self.listener_called = True
+            self.zone = status_msg
+
+        device.add_zone_status_listener(listener)
+        codecs_open = codecs.open("tests/data/ws_zone.xml", "r", "utf-8")
+        try:
+            content = codecs_open.read()
+            device._on_message(None, content)
+            self.assertTrue(self.listener_called)
+            self.assertEqual(mocked_zone_status.call_count, 1)
+            self.assertTrue(self.zone.is_master)
+            self.assertEqual(self.zone.master_id, "1111MASTER")
+        finally:
+            codecs_open.close()
+
+    @mock.patch('requests.get', side_effect=_mocked_device_info)
+    def test_ws_info_notification(self, mocked_device_info):
+        device = MockDevice("192.168.1.1")
+        self.listener_called = False
+        self.info = None
+
+        def listener(status_msg):
+            self.listener_called = True
+            self.info = status_msg
+
+        device.add_device_info_listener(listener)
+        codecs_open = codecs.open("tests/data/ws_info.xml", "r", "utf-8")
+        try:
+            content = codecs_open.read()
+            device._on_message(None, content)
+            self.assertTrue(self.listener_called)
+            self.assertEqual(mocked_device_info.call_count, 1)
+            self.assertEqual(self.info.name, "Home")
+        finally:
+            codecs_open.close()
