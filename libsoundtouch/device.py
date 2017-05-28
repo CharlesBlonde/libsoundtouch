@@ -4,6 +4,8 @@
 # pylint: disable=useless-super-delegation
 
 import logging
+import websocket
+import thread
 from xml.dom import minidom
 
 import requests
@@ -53,26 +55,146 @@ def _get_dom_element_value(xml_dom, element, default_value=None):
 class SoundTouchDevice:
     """Bose SoundTouch Device."""
 
-    def __init__(self, host, port=8090):
+    @staticmethod
+    def __run_listener(listeners, value):
+        """Run Listener with value."""
+        for listener in listeners:
+            listener(value)
+
+    def _run_ws_thread(self, ws):
+        """Start web socket."""
+        ws.run_forever()
+
+    def _on_message(self, ws, message):
+        """Called when web socket is received"""
+        dom = minidom.parseString(message.encode('utf-8'))
+        if dom.firstChild.nodeName == "updates":
+            action_node = dom.firstChild.firstChild
+            action = action_node.nodeName
+            if action == "volumeUpdated":
+                self._volume = Volume(action_node.firstChild)
+                self.__run_listener(self._volume_updated_listeners,
+                                    self._volume)
+            if action == "nowPlayingUpdated":
+                self._status = Status(action_node.firstChild)
+                self.__run_listener(self._status_updated_listeners,
+                                    self._status)
+            if action == "presetsUpdated" and action_node.hasChildNodes():
+                self._presets = []
+                for preset in _get_dom_elements(dom, "preset"):
+                    self._presets.append(Preset(preset))
+                self.__run_listener(self._presets_updated_listeners,
+                                    self._presets)
+            if action == "zoneUpdated":
+                self.__run_listener(self._zone_status_updated_listeners,
+                                    self.zone_status(True))
+            if action == "infoUpdated":
+                self.__init_config()
+                self.__run_listener(self._device_info_updated_listeners,
+                                    self._config)
+
+    def __init__(self, host, port=8090, ws_port=8080):
         """Create a new Soundtouch device.
 
         :param host: Host of the device
         :param port: Port of the device. Default 8090
+        :param ws_port: Web socket port. Default 8080
 
         """
         self._host = host
         self._port = port
+        self._ws_port = ws_port
         self.__init_config()
         self._status = None
         self._volume = None
         self._zone_status = None
         self._presets = None
+        self._ws_client = None
+        self._volume_updated_listeners = []
+        self._status_updated_listeners = []
+        self._presets_updated_listeners = []
+        self._zone_status_updated_listeners = []
+        self._device_info_updated_listeners = []
 
     def __init_config(self):
         response = requests.get(
             "http://" + self._host + ":" + str(self._port) + "/info")
         dom = minidom.parseString(response.text)
         self._config = Config(dom)
+
+    def start_notification(self):
+        """Start Websocket connection."""
+        self._ws_client = websocket.WebSocketApp(
+            "ws://{0}:{1}/".format(self._host, self._ws_port),
+            on_message=self._on_message,
+            subprotocols=['gabbo'])
+
+        thread.start_new_thread(self._run_ws_thread, (self._ws_client,))
+
+    def add_volume_updated_listener(self, listener):
+        """Add a new volume updated listener."""
+        self._volume_updated_listeners.append(listener)
+
+    def add_status_updated_listener(self, listener):
+        """Add a new status updated listener."""
+        self._status_updated_listeners.append(listener)
+
+    def add_presets_updated_listener(self, listener):
+        """Add a new presets updated listener."""
+        self._presets_updated_listeners.append(listener)
+
+    def add_zone_status_updated_listener(self, listener):
+        """Add a new zone status updated listener."""
+        self._zone_status_updated_listeners.append(listener)
+
+    def add_device_info_updated_listener(self, listener):
+        """Add a new device info updated listener."""
+        self._device_info_updated_listeners.append(listener)
+
+    def remove_volume_updated_listener(self, listener):
+        """Remove a new volume updated listener."""
+        if listener in self._volume_updated_listeners:
+            self._volume_updated_listeners.remove(listener)
+
+    def remove_status_updated_listener(self, listener):
+        """Remove a new status updated listener."""
+        if listener in self._status_updated_listeners:
+            self._status_updated_listeners.remove(listener)
+
+    def remove_presets_updated_listener(self, listener):
+        """Remove a new presets updated listener."""
+        if listener in self._presets_updated_listeners:
+            self._presets_updated_listeners.remove(listener)
+
+    def remove_zone_status_updated_listener(self, listener):
+        """Remove a new zone status updated listener."""
+        if listener in self._zone_status_updated_listeners:
+            self._zone_status_updated_listeners.remove(listener)
+
+    def remove_device_info_updated_listener(self, listener):
+        """Remove a new device info updated listener."""
+        if listener in self._device_info_updated_listeners:
+            self._device_info_updated_listeners.remove(listener)
+
+    def clear_volume_updated_listeners(self):
+        """Clear volume updated listeners."""
+        self._volume_updated_listeners.clear()
+
+    def clear_status_updated_listener(self):
+        """Clear status updated listeners."""
+        self._status_updated_listeners.clear()
+
+    def clear_presets_updated_listeners(self):
+        """Clear presets updated listeners."""
+        self._presets_updated_listeners.clear()
+
+    def clear_zone_status_updated_listeners(self):
+        """Clear zone status updated listeners."""
+        self._zone_status_updated_listeners.clear()
+
+    def clear_device_info_updated_listeners(self):
+        """Clear device info updated listener.."""
+        self._device_info_updated_listeners.clear()
 
     def refresh_status(self):
         """Refresh status state."""
