@@ -5,7 +5,7 @@
 
 import logging
 import websocket
-import thread
+from threading import Thread
 from xml.dom import minidom
 
 import requests
@@ -51,6 +51,18 @@ def _get_dom_element_value(xml_dom, element, default_value=None):
         return element.firstChild.nodeValue.strip()
     return default_value
 
+class WebSocketThread(Thread):
+    """Websocket thread."""
+
+    def __init__(self, ws):
+        """Create new Websocket thread."""
+        Thread.__init__(self)
+        self._ws = ws
+
+    def run(self):
+        """Start Websocket thread."""
+        self._ws.run_forever()
+
 
 class SoundTouchDevice:
     """Bose SoundTouch Device."""
@@ -60,10 +72,6 @@ class SoundTouchDevice:
         """Run Listener with value."""
         for listener in listeners:
             listener(value)
-
-    def _run_ws_thread(self, ws):
-        """Start web socket."""
-        ws.run_forever()
 
     def _on_message(self, ws, message):
         """Called when web socket is received"""
@@ -128,8 +136,8 @@ class SoundTouchDevice:
             "ws://{0}:{1}/".format(self._host, self._ws_port),
             on_message=self._on_message,
             subprotocols=['gabbo'])
-
-        thread.start_new_thread(self._run_ws_thread, (self._ws_client,))
+        ws_thread = WebSocketThread(self._ws_client)
+        ws_thread.start()
 
     def add_volume_updated_listener(self, listener):
         """Add a new volume updated listener."""
