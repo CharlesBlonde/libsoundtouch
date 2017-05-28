@@ -162,6 +162,7 @@ You have to sent an email and you'll received a response in a minute with 2 PDF:
 
 | Version |    Date    | Features                                                                   |
 |---------|:----------:|----------------------------------------------------------------------------|
+| 0.5.0   | 2017/05/28 | Add Websocket support                                                      |
 | 0.4.0   | 2017/05/21 | Add Bluetooth source                                                       |
 | 0.3.0   | 2017/04/09 | Allow playing local computer media and fix issue with non ASCII characters |
 | 0.2.2   | 2017/02/07 | Fix status with non ascii characters in Python 2.7                         |
