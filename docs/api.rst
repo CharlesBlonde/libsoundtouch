@@ -7,6 +7,12 @@ Developer Interface
 
 This part of the documentation covers all the interfaces of Libsoundtouch.
 
+Main Interface
+--------------
+
+.. autofunction:: soundtouch_device
+.. autofunction:: discover_devices
+
 Classes
 -------
 

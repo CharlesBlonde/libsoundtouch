@@ -1,6 +1,11 @@
 """Utils for the Bose Soundtouch Device."""
 
+import logging
+import socket
+
 from enum import Enum
+
+_LOGGER = logging.getLogger(__name__)
 
 
 class Key(Enum):
@@ -67,3 +72,31 @@ class Type(Enum):
     TRACK = "track"
     ALBUM = "album"
     PLAYLIST = "playlist"
+
+
+class SoundtouchDeviceListener(object):
+    """Message listener."""
+
+    def __init__(self, add_device_function):
+        """Create a new message listener.
+
+        :param add_device_function: Callback function
+        """
+        self.add_device_function = add_device_function
+
+    def remove_service(self, zeroconf, device_type, name):
+        # pylint: disable=unused-argument,no-self-use
+        """Remove listener."""
+        _LOGGER.info("Service %s removed", name)
+
+    def add_service(self, zeroconf, device_type, name):
+        """Add device.
+
+        :param zeroconf: MSDNS object
+        :param device_type: Service type
+        :param name: Device name
+        """
+        device_name = (name.split(".")[0])
+        info = zeroconf.get_service_info(device_type, name)
+        address = socket.inet_ntoa(info.address)
+        self.add_device_function(device_name, address, info.port)

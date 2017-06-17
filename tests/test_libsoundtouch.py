@@ -18,6 +18,7 @@ except ImportError:
 
 from xml.dom import minidom
 from requests.models import Response
+import zeroconf
 
 
 class MockResponse(Response):
@@ -436,6 +437,16 @@ def _mocked_add_slaves(*args, **kwargs):
               '<member ipaddress="192.168.1.2">'
               '1111SLAVE</member></zone>'):
         raise Exception("Bad argument")
+
+
+def _mocked_service_browser(zc, search, listener):
+    assert isinstance(zc, zeroconf.Zeroconf)
+    assert search == "_soundtouch._tcp.local."
+    mock_zeroconf = mock.MagicMock()
+    service_info = mock.MagicMock()
+    service_info.port = 8090
+    mock_zeroconf.get_service_info.return_value = service_info
+    listener.add_service(mock_zeroconf, '', 'device.tcp')
 
 
 class TestLibSoundTouch(unittest.TestCase):
@@ -1028,3 +1039,17 @@ class TestLibSoundTouch(unittest.TestCase):
             self.assertEqual(self.info.name, "Home")
         finally:
             codecs_open.close()
+
+    @mock.patch('requests.get', side_effect=_mocked_device_info)
+    @mock.patch('socket.inet_ntoa', return_value='192.168.1.1')
+    @mock.patch('zeroconf.ServiceBrowser.__init__', return_value=None,
+                side_effect=_mocked_service_browser)
+    def test_discover_devices(self, mocked_service_browser, mocked_inet_ntoa,
+                              mocked_request_get):
+        devices = libsoundtouch.discover_devices(timeout=1)
+        self.assertEqual(mocked_service_browser.call_count, 1)
+        self.assertEqual(mocked_inet_ntoa.call_count, 1)
+        self.assertEqual(mocked_request_get.call_count, 1)
+        self.assertEqual(len(devices), 1)
+        self.assertEqual(devices[0].host, "192.168.1.1")
+        self.assertEqual(devices[0].port, 8090)
