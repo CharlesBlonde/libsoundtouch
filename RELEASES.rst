@@ -1,3 +1,12 @@
+Version 0.6.0
+~~~~~~~~~~~~~
+
+:Date:
+        2017/06/17
+
+    -  Add discovery (mDNS) support
+    -  Official Python 3.6 support
+
 Version 0.5.0
 ~~~~~~~~~~~~~
 

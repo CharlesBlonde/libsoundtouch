@@ -177,6 +177,7 @@ You have to sent an email and you'll received a response in a minute with 2 PDF:
 
 | Version |    Date    | Features                                                                   |
 |---------|:----------:|----------------------------------------------------------------------------|
+| 0.6.0   | 2017/06/17 | Add discovery (mDNS) support                                               |
 | 0.5.0   | 2017/05/28 | Add Websocket support                                                      |
 | 0.4.0   | 2017/05/21 | Add Bluetooth source                                                       |
 | 0.3.0   | 2017/04/09 | Allow playing local computer media and fix issue with non ASCII characters |
