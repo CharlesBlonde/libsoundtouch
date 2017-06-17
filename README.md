@@ -143,11 +143,17 @@ time.sleep(600)  # Wait for events
 
 ```
 
+## Full documentation
+
+[http://libsoundtouch.readthedocs.io] (http://libsoundtouch.readthedocs.io)
+
 ## Incoming features
 
 The following features are not yet implemented:
 
 * Auto discovery: Soundtouch devices supports SSDP and MDNS auto discovery protocols. Tests has been done but not yet implemented
+* Better error management
+* Bass configuration
 
 ## Access to the official API documentation
 
