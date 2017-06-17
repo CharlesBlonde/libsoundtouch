@@ -1,6 +1,6 @@
 # Bose Soundtouch Python library
 
-[![Build Status](https://travis-ci.org/CharlesBlonde/libsoundtouch.svg?branch=master)](https://travis-ci.org/CharlesBlonde/libsoundtouch) [![Coverage Status](https://coveralls.io/repos/github/CharlesBlonde/libsoundtouch/badge.svg?branch=master)](https://coveralls.io/github/CharlesBlonde/libsoundtouch?branch=master) [![PyPI version](https://badge.fury.io/py/libsoundtouch.svg)](https://badge.fury.io/py/libsoundtouch)
+[![Build Status](https://travis-ci.org/CharlesBlonde/libsoundtouch.svg?branch=master)](https://travis-ci.org/CharlesBlonde/libsoundtouch) [![Coverage Status](https://coveralls.io/repos/github/CharlesBlonde/libsoundtouch/badge.svg?branch=master)](https://coveralls.io/github/CharlesBlonde/libsoundtouch?branch=master) [![PyPI version](https://badge.fury.io/py/libsoundtouch.svg)](https://badge.fury.io/py/libsoundtouch) [![Documentation Status](https://readthedocs.org/projects/libsoundtouch/badge/?version=latest)](http://libsoundtouch.readthedocs.io/en/latest/?badge=latest)
 
 This Python 2.7+/3.4+ library allows you to control [Bose Soundtouch devices](https://www.soundtouch.com/).
 
