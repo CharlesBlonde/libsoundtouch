@@ -21,6 +21,7 @@ This Python 2.7+/3.4+ library allows you to control `Bose Soundtouch devices
 Features
 --------
 
+-  Discovery
 -  power on/power off
 -  play/pause
 -  next/previous track
@@ -42,6 +43,20 @@ Installation
 
     pip install libsoundtouch
 
+Discovery
+~~~~~~~~~
+
+Soundtouch devices support mDNS discovery protocol.
+
+.. code:: python
+
+   from libsoundtouch import discover_devices
+
+   devices = discover_devices(timeout=2)  # Default timeout is 5 seconds
+
+
+   for device in devices:
+       print(device.config.name + " - " + device.config.type)
 
 Basic Usage
 ~~~~~~~~~~~
@@ -51,7 +66,7 @@ Basic Usage
    from libsoundtouch import soundtouch_device
    from libsoundtouch.utils import Source, Type
 
-   device = soundtouch_device('192.168.1.1')
+   device = soundtouch_device('192.168.1.1')  # Manual configuration
    device.power_on()
 
    # Config object
@@ -197,7 +212,6 @@ TODO
 
 The following features are not yet implemented:
 
--  Auto discovery: Soundtouch devices supports SSDP and MDNS auto discovery protocols. Tests has been done but not yet implemented
 -  Better error management
 -  Bass configuration
 

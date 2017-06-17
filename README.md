@@ -12,6 +12,16 @@ pip install libsoundtouch
 ```
 
 ```python
+from libsoundtouch import discover_devices
+
+devices = discover_devices(timeout=2)
+
+
+for device in devices:
+    print(device.config.name + " - " + device.config.type)
+```
+
+```python
 from libsoundtouch import soundtouch_device
 from libsoundtouch.utils import Source, Type
 
@@ -69,6 +79,7 @@ print(len(zone_status.slaves))
 
 ### Basics commands
 
+* Discovery
 * power on/power off
 * play/pause
 * next/previous track
@@ -77,6 +88,7 @@ print(len(zone_status.slaves))
 * shuffle on/off
 * select preset (bookmark)
 * playback selected music
+* Websockets notification
 
 ### Multi-room
 
@@ -151,7 +163,6 @@ time.sleep(600)  # Wait for events
 
 The following features are not yet implemented:
 
-* Auto discovery: Soundtouch devices supports SSDP and MDNS auto discovery protocols. Tests has been done but not yet implemented
 * Better error management
 * Bass configuration
 
