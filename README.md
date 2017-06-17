@@ -4,8 +4,6 @@
 
 This Python 2.7+/3.4+ library allows you to control [Bose Soundtouch devices](https://www.soundtouch.com/).
 
-This library has been created in order to create a component for the [Home Assistant](https://home-assistant.io/) project but is totally independent.
-
 ## How to use it ?
 
 
@@ -103,7 +101,7 @@ master.add_zone_slave([slave2])
 
 ### Websocket
 
-Soudtouch devices support Websocket notifications in order to prevent pulling and to get immediate updates.
+Soundtouch devices support Websocket notifications in order to prevent pulling and to get immediate updates.
 
 ```python
 from libsoundtouch import soundtouch_device

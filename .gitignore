@@ -8,3 +8,4 @@ build/
 dist/
 .cache/
 runtime/*
+docs/_build
