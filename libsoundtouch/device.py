@@ -363,14 +363,14 @@ class SoundTouchDevice:
 
         :param source: Source from which to play. Elements of Source enum.
         :param location: A unique uri or identifier. Represents the
-        requested music from the source.
+            requested music from the source.
         :param source_acc: Source account. Imperative for some sources.
-        For Spotify, this can be found by playing Spotify on the connected
-        SoundTouch speaker, and calling:
-        device.status().content_item.source_account
+            For Spotify, this can be found by playing Spotify on the connected
+            SoundTouch speaker, and calling:
+            device.status().content_item.source_account
         :param media_type: Type of the requested music. Typical values are:
-        "uri", "track", "album", "playlist". This can be found in
-        device.status().content_item.type
+            "uri", "track", "album", "playlist". This can be found in
+            device.status().content_item.type
         """
         action = "/select"
         play = '<ContentItem source="%s" type="%s" sourceAccount="%s" ' \
