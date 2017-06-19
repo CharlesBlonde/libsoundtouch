@@ -1,4 +1,4 @@
 requests
 websocket-client
-enum34
+enum-compat
 zeroconf
