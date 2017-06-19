@@ -5,7 +5,7 @@ PACKAGES = find_packages(exclude=['tests', 'tests.*'])
 
 REQUIRES = [
     'requests>=2,<3',
-    'enum34>=1.1.6',
+    'enum-compat>=0.0.2',
     'websocket-client>=0.40.0',
     'zeroconf>=0.19.1'
 ]
