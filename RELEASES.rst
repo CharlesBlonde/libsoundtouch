@@ -1,8 +1,16 @@
+Version 0.6.1
+~~~~~~~~~~~~~
+
+:Date:
+    2017/06/19
+
+    -  Fix: Use enum-compat instead of enum34 directly
+
 Version 0.6.0
 ~~~~~~~~~~~~~
 
 :Date:
-        2017/06/17
+    2017/06/17
 
     -  Add discovery (mDNS) support
     -  Official Python 3.6 support

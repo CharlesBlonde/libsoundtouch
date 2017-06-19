@@ -177,6 +177,7 @@ You have to sent an email and you'll received a response in a minute with 2 PDF:
 
 | Version |    Date    | Features                                                                   |
 |---------|:----------:|----------------------------------------------------------------------------|
+| 0.6.1   | 2017/06/17 | Use enum-compat instead of enum34 directly                                 |
 | 0.6.0   | 2017/06/17 | Add discovery (mDNS) support                                               |
 | 0.5.0   | 2017/05/28 | Add Websocket support                                                      |
 | 0.4.0   | 2017/05/21 | Add Bluetooth source                                                       |
@@ -190,6 +191,7 @@ You have to sent an email and you'll received a response in a minute with 2 PDF:
 
 Thanks to:
 
+* [jeanregisser](https://github.com/jeanregisser) (Use enum-compat instead of enum34 directly)
 * [Tyzer34](https://github.com/Tyzer34) (add *play_media* support)
 * [wanderor](https://github.com/wanderor) (add local computer media support)
 * [obadz](https://github.com/obadz) (add Bluetooth source)
