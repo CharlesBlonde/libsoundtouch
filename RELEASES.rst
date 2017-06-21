@@ -1,3 +1,11 @@
+Version 0.6.2
+~~~~~~~~~~~~~
+
+:Date:
+        2017/06/21
+
+        -  Fix: websocket source status in messages
+
 Version 0.6.1
 ~~~~~~~~~~~~~
 

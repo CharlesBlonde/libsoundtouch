@@ -177,7 +177,8 @@ You have to sent an email and you'll received a response in a minute with 2 PDF:
 
 | Version |    Date    | Features                                                                   |
 |---------|:----------:|----------------------------------------------------------------------------|
-| 0.6.1   | 2017/06/17 | Use enum-compat instead of enum34 directly                                 |
+| 0.6.2   | 2017/06/21 | Fix websocket source status in messages                                    |
+| 0.6.1   | 2017/06/19 | Use enum-compat instead of enum34 directly                                 |
 | 0.6.0   | 2017/06/17 | Add discovery (mDNS) support                                               |
 | 0.5.0   | 2017/05/28 | Add Websocket support                                                      |
 | 0.4.0   | 2017/05/21 | Add Bluetooth source                                                       |
