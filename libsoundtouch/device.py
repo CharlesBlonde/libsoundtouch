@@ -86,7 +86,7 @@ class SoundTouchDevice:
                 self.__run_listener(self._volume_updated_listeners,
                                     self._volume)
             if action == "nowPlayingUpdated":
-                self._status = Status(action_node.firstChild)
+                self._status = Status(action_node)
                 self.__run_listener(self._status_updated_listeners,
                                     self._status)
             if action == "presetsUpdated" and action_node.hasChildNodes():

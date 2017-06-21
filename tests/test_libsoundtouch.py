@@ -954,6 +954,7 @@ class TestLibSoundTouch(unittest.TestCase):
             content = codecs_open.read()
             device._on_message(None, content)
             self.assertTrue(self.listener_called)
+            self.assertEqual(self.status.source, "SPOTIFY")
             self.assertEqual(self.status.track, "Devil We Know")
         finally:
             codecs_open.close()
