@@ -1,6 +1,18 @@
 language: python
-python:
-  - "3.4"
+matrix:
+  include:
+    - python: "3.4.2"
+      env: TOXENV=lint
+    - python: "2.7.12"
+      env: TOXENV=py27
+    - python: "3.4.2"
+      env: TOXENV=py34
+    - python: "3.5"
+      env: TOXENV=py35
+    - python: "3.6"
+      env: TOXENV=py36
+    - python: "3.4.2"
+      env: TOXENV=typing
 install: "pip install -U tox coveralls"
 script: tox
 after_success: coveralls
