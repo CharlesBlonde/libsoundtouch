@@ -5,7 +5,7 @@ import time
 
 import libsoundtouch
 from libsoundtouch.device import NoSlavesException, NoExistingZoneException, \
-    Preset, Config, SoundTouchDevice
+    Preset, Config, SoundTouchDevice, SoundtouchInvalidUrlException
 from libsoundtouch.utils import Source, Type
 import logging
 import codecs
@@ -41,6 +41,7 @@ class MockDevice(SoundTouchDevice):
         self._volume = None
         self._presets = None
         self._ws_port = 8080
+        self._dlna_port = 8091
         self._volume_updated_listeners = []
         self._status_updated_listeners = []
         self._presets_updated_listeners = []
@@ -240,6 +241,17 @@ def _mocked_play_pause(*args, **kwargs):
         '<key state="release" sender="Gabbo">PLAY_PAUSE</key>'
     ]:
         raise Exception("Unknown call")
+
+
+def _mocked_play_url(*args, **kwargs):
+    assert args[0] == "http://192.168.1.1:8091/AVTransport/Control"
+    action = "urn:schemas-upnp-org:service:AVTransport:1#SetAVTransportURI"
+    assert kwargs['headers']['SOAPACTION'] == action
+    assert kwargs['headers']['Content-Type'] == 'text/xml; charset="utf-8"'
+    assert kwargs['headers']['HOST'] == '192.168.1.1:8091'
+    dom = minidom.parseString(kwargs['data'])
+    url = dom.getElementsByTagName("CurrentURI")[0].firstChild.nodeValue
+    assert url == "http://fqdn/file.mp3"
 
 
 def _mocked_power(*args, **kwargs):
@@ -464,6 +476,8 @@ class TestLibSoundTouch(unittest.TestCase):
         self.assertEqual(mocked_device_info.call_count, 1)
         self.assertEqual(device.host, "192.168.1.1")
         self.assertEqual(device.port, 8090)
+        self.assertEqual(device.ws_port, 8080)
+        self.assertEqual(device.dlna_port, 8091)
         self.assertEqual(device.config.device_id, "00112233445566")
         self.assertEqual(device.config.device_ip, "192.168.1.1")
         self.assertEqual(device.config.mac_address, "66554433221100")
@@ -652,6 +666,17 @@ class TestLibSoundTouch(unittest.TestCase):
         device = MockDevice("192.168.1.1")
         device.play_pause()
         self.assertEqual(mocked_play_pause.call_count, 2)
+
+    @mock.patch('requests.post', side_effect=_mocked_play_url)
+    def test_play_url(self, mocked_play_url):
+        device = MockDevice("192.168.1.1")
+        device.play_url("http://fqdn/file.mp3")
+        self.assertEqual(mocked_play_url.call_count, 1)
+
+    def test_play_invalid_url(self):
+        device = MockDevice("192.168.1.1")
+        self.assertRaises(SoundtouchInvalidUrlException, device.play_url,
+                          "https://fqdn/file.mp3")
 
     @mock.patch('libsoundtouch.SoundTouchDevice.refresh_status',
                 side_effect=None)

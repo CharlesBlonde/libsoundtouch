@@ -30,6 +30,7 @@ Features
 -  shuffle on/off
 -  select preset (bookmark)
 -  playback selected music
+-  play HTTP URL (not HTTPS)
 -  Multi room (zones)
 -  Websocket notifications
 
@@ -107,6 +108,9 @@ Basic Usage
       'album:1',
       account_id,
       Type.ALBUM)
+
+   # Play an HTTP URL (not HTTPS)
+   device.play_url('http://fqdn/file.mp3')
 
    # Volume object
    # device.volume() will do an HTTP request.
