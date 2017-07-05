@@ -183,6 +183,7 @@ You have to sent an email and you'll received a response in a minute with 2 PDF:
 
 | Version |    Date    | Features                                                                   |
 |---------|:----------:|----------------------------------------------------------------------------|
+| 0.7.1   | 2017/07/05 | Remove debugging (print)                                                   |
 | 0.7.0   | 2017/07/05 | Add play_url method to play an HTTP URL (HTTPS not supported)              |
 | 0.6.2   | 2017/06/21 | Fix websocket source status in messages                                    |
 | 0.6.1   | 2017/06/19 | Use enum-compat instead of enum34 directly                                 |

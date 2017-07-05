@@ -1,3 +1,11 @@
+Version 0.7.1
+~~~~~~~~~~~~~
+
+:Date:
+    2017/07/05
+
+    -  Fix: remove debug
+
 Version 0.7.0
 ~~~~~~~~~~~~~
 

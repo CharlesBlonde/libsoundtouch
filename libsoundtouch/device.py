@@ -239,7 +239,6 @@ class SoundTouchDevice:
         response = requests.get(
             "http://" + self._host + ":" + str(self._port) + "/now_playing")
         response.encoding = 'UTF-8'
-        print(response.text)
         dom = minidom.parseString(response.text.encode('utf-8'))
         self._status = Status(dom)
 
@@ -382,7 +381,6 @@ class SoundTouchDevice:
                '</ContentItem>' % (
                    source.value, media_type.value,
                    source_acc if source_acc else '', location)
-        print(play)
         requests.post('http://' + self._host + ":" +
                       str(self._port) + action, play)
 
