@@ -1,10 +1,18 @@
+Version 0.7.0
+~~~~~~~~~~~~~
+
+:Date:
+    2017/07/05
+
+    -  Add play_url to play an HTTP URL (not HTTPS)
+
 Version 0.6.2
 ~~~~~~~~~~~~~
 
 :Date:
-        2017/06/21
+    2017/06/21
 
-        -  Fix: websocket source status in messages
+    -  Fix: websocket source status in messages
 
 Version 0.6.1
 ~~~~~~~~~~~~~

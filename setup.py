@@ -23,9 +23,9 @@ PROJECT_CLASSIFIERS = [
 
 setup(
     name="libsoundtouch",
-    version="0.6.2",
+    version="0.7.0",
     license="Apache License 2.0",
-    url="https://github.com/CharlesBlonde/libsoundtouch",
+    url="http://libsoundtouch.readthedocs.io",
     download_url="https://github.com/CharlesBlonde/libsoundtouch",
     author="Charles Blonde",
     author_email="charles.blonde@gmail.com",

@@ -4,6 +4,8 @@
 
 This Python 2.7+/3.4+ library allows you to control [Bose Soundtouch devices](https://www.soundtouch.com/).
 
+[http://libsoundtouch.readthedocs.io](http://libsoundtouch.readthedocs.io)
+
 ## How to use it ?
 
 
@@ -53,6 +55,9 @@ device.play_media(Source.SPOTIFY, 'spotify:track:5J59VOgvclrhLDYUoH5OaW', spot_u
 account_id = device.status().content_item.source_account
 device.play_media(Source.LOCAL_MUSIC, 'album:1', account_id, Type.ALBUM)
 
+# Play URL
+device.play_url('http://fqdn/file.mp3')
+
 # Volume object
 # device.volume() will do an HTTP request. Try to cache this value if needed.
 volume = device.volume()
@@ -88,6 +93,7 @@ print(len(zone_status.slaves))
 * shuffle on/off
 * select preset (bookmark)
 * playback selected music
+* play HTTP URL (HTTPS not supported)
 * Websockets notification
 
 ### Multi-room
@@ -177,6 +183,7 @@ You have to sent an email and you'll received a response in a minute with 2 PDF:
 
 | Version |    Date    | Features                                                                   |
 |---------|:----------:|----------------------------------------------------------------------------|
+| 0.7.0   | 2017/07/05 | Add play_url method to play an HTTP URL (HTTPS not supported)              |
 | 0.6.2   | 2017/06/21 | Fix websocket source status in messages                                    |
 | 0.6.1   | 2017/06/19 | Use enum-compat instead of enum34 directly                                 |
 | 0.6.0   | 2017/06/17 | Add discovery (mDNS) support                                               |
