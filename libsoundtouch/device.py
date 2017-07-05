@@ -6,6 +6,8 @@
 import logging
 from threading import Thread
 from xml.dom import minidom
+import os
+import re
 
 import requests
 import websocket
@@ -103,7 +105,7 @@ class SoundTouchDevice:
                 self.__run_listener(self._device_info_updated_listeners,
                                     self._config)
 
-    def __init__(self, host, port=8090, ws_port=8080):
+    def __init__(self, host, port=8090, ws_port=8080, dlna_port=8091):
         """Create a new Soundtouch device.
 
         :param host: Host of the device
@@ -114,6 +116,7 @@ class SoundTouchDevice:
         self._host = host
         self._port = port
         self._ws_port = ws_port
+        self._dlna_port = dlna_port
         self.__init_config()
         self._status = None
         self._volume = None
@@ -236,6 +239,7 @@ class SoundTouchDevice:
         response = requests.get(
             "http://" + self._host + ":" + str(self._port) + "/now_playing")
         response.encoding = 'UTF-8'
+        print(response.text)
         dom = minidom.parseString(response.text.encode('utf-8'))
         self._status = Status(dom)
 
@@ -378,8 +382,37 @@ class SoundTouchDevice:
                '</ContentItem>' % (
                    source.value, media_type.value,
                    source_acc if source_acc else '', location)
+        print(play)
         requests.post('http://' + self._host + ":" +
                       str(self._port) + action, play)
+
+    def play_url(self, url):
+        """
+        Start music playback from an HTTP URL.
+
+        Warning: HTTPS is not supported.
+
+        :param url: HTTP URL to play.
+        """
+        if not re.match(r'http://', url):
+            raise SoundtouchInvalidUrlException
+
+        action = "urn:schemas-upnp-org:service:AVTransport:1#SetAVTransportURI"
+        headers = {
+            "User-Agent": "libsoundtouch",
+            "Accept": "*/*",
+            "Content-Type": "text/xml; charset=\"utf-8\"",
+            "HOST": "{0}:{1}".format(self.host, self.dlna_port),
+            "SOAPACTION": action
+        }
+        template_file = os.path.join(os.path.dirname(__file__),
+                                     'templates/avt_transport_uri.xml')
+        with open(template_file, 'r') as template:
+            body = template.read().format(url)
+            requests.post(
+                "http://{0}:{1}/AVTransport/Control".format(self.host,
+                                                            self.dlna_port),
+                data=body, headers=headers)
 
     @property
     def host(self):
@@ -390,6 +423,16 @@ class SoundTouchDevice:
     def port(self):
         """Return API port of the device."""
         return self._port
+
+    @property
+    def dlna_port(self):
+        """Return DLNA port."""
+        return self._dlna_port
+
+    @property
+    def ws_port(self):
+        """Return Web Socket port."""
+        return self._ws_port
 
     @property
     def config(self):
@@ -1003,3 +1046,11 @@ class NoSlavesException(SoundtouchException):
     def __init__(self):
         """NoSlavesException."""
         super(NoSlavesException, self).__init__()
+
+
+class SoundtouchInvalidUrlException(SoundtouchException):
+    """Exception while trying to play an invalid URL."""
+
+    def __init__(self):
+        """SoundtouchInvalidUrlException."""
+        super(SoundtouchInvalidUrlException, self).__init__()
