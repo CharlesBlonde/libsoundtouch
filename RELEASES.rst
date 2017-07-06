@@ -1,3 +1,11 @@
+Version 0.7.2
+~~~~~~~~~~~~~
+
+:Date:
+    2017/07/05
+
+    -  Fix: Add missing template
+
 Version 0.7.1
 ~~~~~~~~~~~~~
 
