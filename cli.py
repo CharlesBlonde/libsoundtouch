@@ -13,111 +13,103 @@ class SoundtouchPrompt(Cmd):
 	def __init__(self,device):
 		Cmd.__init__(self)
 		self._device = device
+		self._device.add_volume_listener(volume_listener)
+		self._device.add_status_listener(status_listener)
+		self._device.add_presets_listener(preset_listener)
+		self._device.add_zone_status_listener(zone_status_listener)
+		# Start websocket thread. Not started by default
+		self._device.start_notification()
 
 	def do_status(self, args):
 		"""Requests and prints the device's status"""
-		status = device.status()
-		if status.source == Source.INTERNET_RADIO.name:
-			print('Source: Internet Radio')
-			print('Station: ' + status.station_name + ' from ' + status.station_location)
-			print('Status: ', end='')
-			if status.play_status == 'PLAY_STATE' :
-				print('Playing')
-			else:
-				print('Stopped')
-			print('Description: "' + status.description + '"')
-		elif status.source == Source.STORED_MUSIC.name:
-			print('Source: Stored Music')
-			print('Artist - Title: "' + status.artist + '" - "' + status.track + '"')
-			print('Album: "' + status.album + '"')
-			print('Status: ', end='')
-			if status.play_status == 'PLAY_STATE' :
-				print('Playing', end='')
-			elif status.play_status == 'PAUSE_STATE' :
-				print('Paused', end='')
-			elif status.play_status == 'STOP_STATE':
-				print('Stopped', end='')
-			else:
-				print('Unkown', end='')
-			print(' @ ' + str(status.position) + '/' + str(status.duration) + ', Shuffle: ', end='')
-			if status.shuffle_setting == Key.SHUFFLE_OFF.name:
-				print('off', end='')
-			elif status.shuffle_setting == Key.SHUFFLE_ON.name:
-				print('on', end='')
-			print(', Repeat: ', end='')
-			if status.repeat_setting == Key.REPEAT_OFF.name:
-				print('off')
-			elif status.repeat_setting == Key.REPEAT_ONE.name:
-				print('one')
-			elif status.repeat_setting == Key.REPEAT_ALL.name:
-				print('all')
-		elif status.source == Source.AUX.name:
-			print('Source: Aux')
-		elif status.source == Source.BLUETOOTH.name:
-			print('Source: Bluetooth')
-			if status.play_status == 'INVALID_PLAY_STATUS':
-				return
-			print('Device: ' + status.station_name)
-			if status.artist != None:
-				print('Artist - Title: "' + status.artist + '" - "' + status.track + '"')
-				print('Album: "' + status.album + '"')
-			print('Status: ', end='')
-			if status.play_status == 'PLAY_STATE' :
-				print('Playing')
-			elif status.play_status == 'PAUSE_STATE' :
-				print('Paused')
-			elif status.play_status == 'STOP_STATE':
-				print('Stopped')
-			else:
-				print('Unkown')
-		elif status.source == Source.STANDBY.name:
-			print('The device is currently in standby.')
-		else:
-			pprint(vars(status))
+		status = self._device.status()
+		print_status(status)
 
 	def do_mute(self, args):
 		"""Mute/Un-mute volume."""
-		device.mute()
+		self._device.mute()
+
+	def do_volget(self, args):
+		"""Get current volume."""
+		print('Volume: ' + str(self._device.volume().actual))
+
+	def do_volset(self, value):
+		"""Volume [value]."""
+		if len(value) == 0:
+			print('Please provide a volume level.')
+			return
+		try:
+			volume = int(value)
+		except ValueError:
+			print('Target volume has to an integer to base 10')
+			return
+		if volume < 0 or volume > 100:
+			print('Volume has to be between 0 and 100')
+			return
+		self._device.set_volume(volume)
+
+	def do_preset(self,value):
+		"""Preset [preset number]"""
+		if len(value) == 0:
+			print('Please provide a preset.')
+			return
+		try:
+			presetIdx = int(value)
+		except ValueError:
+			print('Preset has to an integer to base 10')
+			return
+		if presetIdx < 1 or presetIdx > 6:
+			print('Volume has to be between 1 and 6')
+			return
+		presets = self._device.presets()
+		self._device.select_preset(presets[presetIdx - 1])
 
 	def do_volup(self, args):
 		"""Volume up."""
-		device.volume_up()
+		self._device.volume_up()
 
 	def do_voldown(self, args):
 		"""Volume down."""
-		device.volume_down()
+		self._device.volume_down()
 
 	def do_next(self, args):
 		"""Switch to next track."""
-		device.next_track()
+		self._device.next_track()
 
 	def do_prev(self, args):
 		"""Switch to previous track."""
-		device.previous_track()
+		self._device.previous_track()
 
 	def do_pause(self, args):
 		"""Pause."""
-		device.pause()
+		self._device.pause()
 
 	def do_play(self, args):
 		"""Play."""
-		device.play()
+		self._device.play()
 
 	def do_play_pause(self, args):
 		"""Toggle play status."""
-		device.play_pause()
+		self._device.play_pause()
+
+	def do_play_url(self,url):
+		"""Play_url [url]"""
+		if len(url) == 0:
+			print('Please provide an URL')
+			return
+		self._device.play_url(url)
 
 	def do_repeat_off(self, args):
 		"""Turn off repeat."""
-		device.repeat_off()
+		self._device.repeat_off()
 
 	def do_repeat_one(self, args):
 		"""Repeat one."""
-		device.repeat_one()
+		self._device.repeat_one()
 
 	def do_repeat_all(self, args):
 		"""Repeat all."""
-		device.repeat_all()
+		self._device.repeat_all()
 
 	def do_shuffle(self, shuffle):
 		"""Shuffle [on/off].
@@ -128,27 +120,111 @@ class SoundtouchPrompt(Cmd):
 			return
 		if shuffle.lower() == 'on':
 			print('Turning shuffle mode on')
-			device.shuffle(True)
+			self._device.shuffle(True)
 		elif shuffle.lower() == 'off':
 			print('Turning shuffle mode off')
-			device.shuffle(False)
+			self._device.shuffle(False)
 		else:
 			print('Unkown shuffle mode')
 
 	def do_poweroff(self, args):
 		"""Turn the device off"""
-		device.power_off()
+		self._device.power_off()
 
 	def do_poweron(self, args):
 		"""Turn the device on"""
-		device.power_on()
+		self._device.power_on()
 
 	def do_quit(self, args):
 		"""Quits the program."""
+		self._device.stop_notification()
 		print("Quitting.")
 		raise SystemExit
 
+	def do_EOF(self,line):
+		return True
 
+def print_status(status):
+	pprint(vars(status))
+	pprint(vars(status.content_item))
+	if status.source == Source.INTERNET_RADIO.name:
+		print('Source: Internet Radio')
+		print('Station: ' + status.station_name + ' from ' + status.station_location)
+		print_play_status(status.play_status, eol='')
+		print('Description: "' + status.description + '"')
+	elif status.source == Source.STORED_MUSIC.name:
+		print('Source: Stored Music')
+		print('Artist - Title: "' + status.artist + '" - "' + status.track + '"')
+		print('Album: "' + status.album + '"')
+		print_play_status(status.play_status, eol='')
+		print(' @ ' + str(status.position) + '/' + str(status.duration) + ', Shuffle: ', end='')
+		if status.shuffle_setting == Key.SHUFFLE_OFF.name:
+			print('off', end='')
+		elif status.shuffle_setting == Key.SHUFFLE_ON.name:
+			print('on', end='')
+		print(', Repeat: ', end='')
+		if status.repeat_setting == Key.REPEAT_OFF.name:
+			print('off')
+		elif status.repeat_setting == Key.REPEAT_ONE.name:
+			print('one')
+		elif status.repeat_setting == Key.REPEAT_ALL.name:
+			print('all')
+	elif status.source == Source.AUX.name:
+		print('Source: Aux')
+	elif status.source == Source.BLUETOOTH.name:
+		print('Source: Bluetooth')
+		if status.play_status == 'INVALID_PLAY_STATUS':
+			return
+		print('Device: ' + status.station_name)
+		if status.artist != None:
+			print('Artist - Title: "' + status.artist + '" - "' + status.track + '"')
+			print('Album: "' + status.album + '"')
+		print_play_status(status.play_status)
+	elif status.source == Source.STANDBY.name:
+		print('The device is currently in standby.')
+	elif status.source == Source.UPNP.name:
+		print('Source: UPNP')
+		if status.stream_type == 'TRACK_ONDEMAND':
+			print('Location: ' + status.content_item.location)
+		print_play_status(status.play_status)
+	else:
+		pprint(vars(status))
+		pprint(vars(status.content_item))
+
+def print_play_status(status, eol='\n'):
+	print('Status: ', end='')
+	if status == 'PLAY_STATE' :
+		print('Playing', end=eol)
+	elif status == 'PAUSE_STATE' :
+		print('Paused', end=eol)
+	elif status == 'STOP_STATE':
+		print('Stopped', end=eol)
+	elif status == 'BUFFERING_STATE':
+		print('Loading', end=eol)
+	else:
+		print('Unkown', end=eol)
+
+# Volume updated
+def volume_listener(volume):
+	print('WebSocket - Volume: ' + int(volume.actual))
+
+# Status updated
+def status_listener(status):
+	print('WebSocket - Status: ')
+	print_status(status)
+
+# Presets updated
+def preset_listener(presets):#
+	print('WebSocket - Presets: ')
+	for preset in presets:
+		print(preset.name)
+
+# Zone updated
+def zone_status_listener(zone_status):
+	if zone_status:
+		print(zone_status.master_id)
+	else:
+		print('no Zone')
 
 if __name__ == '__main__':
 	global device
