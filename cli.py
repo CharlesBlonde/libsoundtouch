@@ -49,6 +49,14 @@ class SoundtouchPrompt(Cmd):
 			return
 		self._device.set_volume(volume)
 
+	def do_preset_get(self,value):
+		"""Preset_get
+			Retrieves all presets from device, and prints them"""
+		presets = self._device.presets()
+		for preset in presets:
+			print('ID: ' + preset.preset_id + ', Name: "' + preset.name + '"')
+			#pprint(vars(preset))
+
 	def do_preset_play(self,value):
 		"""Preset_play [preset number]"""
 		if len(value) == 0:
