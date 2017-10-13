@@ -29,12 +29,13 @@ class SoundtouchPrompt(Cmd):
 		"""Mute/Un-mute volume."""
 		self._device.mute()
 
-	def do_volget(self, args):
+	def do_vol_get(self, args):
 		"""Get current volume."""
 		print('Volume: ' + str(self._device.volume().actual))
 
-	def do_volset(self, value):
-		"""Volume [value]."""
+	def do_vol_set(self, value):
+		"""Vol_set [value].
+			Sets current volume"""
 		if len(value) == 0:
 			print('Please provide a volume level.')
 			return
@@ -48,8 +49,8 @@ class SoundtouchPrompt(Cmd):
 			return
 		self._device.set_volume(volume)
 
-	def do_preset(self,value):
-		"""Preset [preset number]"""
+	def do_preset_play(self,value):
+		"""Preset_play [preset number]"""
 		if len(value) == 0:
 			print('Please provide a preset.')
 			return
@@ -64,11 +65,11 @@ class SoundtouchPrompt(Cmd):
 		presets = self._device.presets()
 		self._device.select_preset(presets[presetIdx - 1])
 
-	def do_volup(self, args):
+	def do_vol_up(self, args):
 		"""Volume up."""
 		self._device.volume_up()
 
-	def do_voldown(self, args):
+	def do_vol_down(self, args):
 		"""Volume down."""
 		self._device.volume_down()
 
