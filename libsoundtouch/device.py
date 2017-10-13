@@ -144,6 +144,12 @@ class SoundTouchDevice:
         ws_thread = WebSocketThread(self._ws_client)
         ws_thread.start()
 
+    def stop_notification(self):
+        """Stop Websocket connection."""
+        if self._ws_client:
+            self._ws_client.close()
+
+
     def add_volume_listener(self, listener):
         """Add a new volume updated listener."""
         self._volume_updated_listeners.append(listener)
