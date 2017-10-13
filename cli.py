@@ -245,7 +245,6 @@ if __name__ == '__main__':
 		host = '192.168.111.106'
 	try:
 		device = soundtouch_device(host)
-		device.power_on()
 	except ConnectionError as e:
 		print('Could not connect to device(' + host + '):\n' + e.__str__() + '\n', file=sys.stderr)
 		exit(-1)
