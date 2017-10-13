@@ -142,6 +142,7 @@ class SoundtouchPrompt(Cmd):
 		raise SystemExit
 
 	def do_EOF(self,line):
+		self._device.stop_notification()
 		return True
 
 def print_status(status):
