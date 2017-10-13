@@ -104,6 +104,9 @@ class SoundTouchDevice:
                 self.__init_config()
                 self.__run_listener(self._device_info_updated_listeners,
                                     self._config)
+        else:
+            print 'Did not receive an update. Printing the message:'
+            print '"' + message.encode('utf-8') + '"'
 
     def __init__(self, host, port=8090, ws_port=8080, dlna_port=8091):
         """Create a new Soundtouch device.
