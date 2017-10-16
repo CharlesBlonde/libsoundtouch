@@ -6,13 +6,14 @@
 import logging
 from threading import Thread
 from xml.dom import minidom
+from pprint import pprint
 import os
 import re
 
 import requests
 import websocket
 
-from .utils import Key, Type
+from .utils import Key, Type, Source
 
 STATE_STANDBY = 'STANDBY'
 
@@ -22,6 +23,11 @@ _LOGGER = logging.getLogger(__name__)
 def _get_dom_attribute(xml_dom, attribute, default_value=None):
     if attribute in xml_dom.attributes.keys():
         return xml_dom.attributes[attribute].value
+    return default_value
+
+def _get_dom_value(xml_dom, default_value=None):
+    if xml_dom is not None and xml_dom.firstChild is not None:
+        return xml_dom.firstChild.nodeValue.strip()
     return default_value
 
 
@@ -53,6 +59,37 @@ def _get_dom_element_value(xml_dom, element, default_value=None):
         return element.firstChild.nodeValue.strip()
     return default_value
 
+def get_source_type(source):
+    if source.source_type == Source.SLAVE_SOURCE.name:
+        return "slave"
+    elif source.source_type == Source.PANDORA.name:
+        return "Pandora"
+    elif source.source_type == Source.INTERNET_RADIO.name:
+        return "internet radio"
+    elif source.source_type == Source.AIRPLAY.name:
+        return "Airplay"
+    elif source.source_type == Source.STORED_MUSIC.name:
+        return "stored music"
+    elif source.source_type == Source.AUX.name:
+        return "AUX"
+    elif source.source_type == Source.CURRATED_RADIO.name:
+        return "currated radio"
+    elif source.source_type == Source.DEEZER.name:
+        return "Deezer"
+    elif source.source_type == Source.SPOTIFY.name:
+        return "Spotify"
+    elif source.source_type == Source.IHEART.name:
+        return "iHeart"
+    elif source.source_type == Source.LOCAL_MUSIC.name:
+        return "local music"
+    elif source.source_type == Source.BLUETOOTH.name:
+        return "Bluetooth"
+    elif source.source_type == Source.UPNP.name:
+        return "UPNP"
+    elif source.source_type == Source.TUNEIN.name:
+        return "TuneIn"
+    else:
+        return "UNKNOWN"
 
 class WebSocketThread(Thread):
     """Websocket thread."""
@@ -123,6 +160,7 @@ class SoundTouchDevice:
         self.__init_config()
         self._status = None
         self._volume = None
+        self._sources = None
         self._zone_status = None
         self._presets = None
         self._ws_client = None
@@ -420,6 +458,27 @@ class SoundTouchDevice:
                 "http://{0}:{1}/AVTransport/Control".format(self.host,
                                                             self.dlna_port),
                 data=body, headers=headers)
+
+    def sources(self, refresh=True):
+        """Get available sources.
+
+        :param refresh: Force refresh, else return old data.
+        """
+        if self._sources is None or refresh:
+            self.refresh_sources()
+        return self._sources
+
+    def refresh_sources(self):
+        """Refresh volume state."""
+        response = requests.get(
+            "http://" + self._host + ":" + str(self._port) + "/sources")
+        print response.text
+        dom = minidom.parseString(response.text)
+        self._sources = []
+        src_root = _get_dom_element(dom, "sources")
+        for source in _get_dom_elements(src_root, "sourceItem"):
+            self._sources.append(SourceItem(source))
+
 
     @property
     def host(self):
@@ -875,6 +934,50 @@ class ContentItem:
         """Return true if presetable."""
         return self._is_presetable
 
+class SourceItem:
+    """Bose Soundtouch source."""
+
+    def __init__(self, xml_dom):
+        """Create a new Bose Soundtouch source.
+
+        :param xml_dom: source configuration XML DOM
+        """
+        self._source = _get_dom_attribute(xml_dom, "source")
+        self._status = _get_dom_attribute(xml_dom, "status")
+        self._local = _get_dom_attribute(xml_dom, "isLocal") == "true"
+        self._multiroomallowed = _get_dom_attribute(xml_dom, "multiroomallowed") == "true"
+        self._sourceAccount = _get_dom_attribute(xml_dom, "sourceAccount")
+        self._name = _get_dom_value(xml_dom)
+
+    @property
+    def source_type(self):
+        """Source type"""
+        return self._source
+
+    @property
+    def status(self):
+        """Status of this source"""
+        return self._status
+
+    @property
+    def local(self):
+        """IS this a local source?"""
+        return self._local
+
+    @property
+    def multiroomallowed(self):
+        """Is multiroom for this source allowed?"""
+        return self._multiroomallowed
+
+    @property
+    def source_account(self):
+        """Account to log in to the service"""
+        return self._sourceAccount
+
+    @property
+    def name(self):
+        """Name"""
+        return self._name
 
 class Volume:
     """Volume configuration."""

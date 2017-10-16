@@ -1,6 +1,7 @@
 from __future__ import print_function
 from libsoundtouch import soundtouch_device
-from libsoundtouch.utils import Source, Type, Key
+from libsoundtouch.device import get_source_type
+from libsoundtouch.utils import Source, Type, Key, SourceStatus
 from cmd import Cmd
 from requests.exceptions import ConnectionError
 import sys
@@ -24,6 +25,18 @@ class SoundtouchPrompt(Cmd):
 		"""Requests and prints the device's status"""
 		status = self._device.status()
 		print_status(status)
+
+	def do_sources_get(self,args):
+		"""Get availabe sources"""
+		sources = self._device.sources()
+		for source in sources:
+			if source.status == SourceStatus.UNAVAILABLE.name:
+				continue
+			print('Name: "' + str(source.name), end='')
+			print('", Status: ' + source.status, end='')
+			print(', Source: ' + get_source_type(source), end='')
+			print(', Local: ' + str(source.local), end='')
+			print(', Source Account: "' + str(source.source_account) + '"')
 
 	def do_mute(self, args):
 		"""Mute/Un-mute volume."""

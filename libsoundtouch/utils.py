@@ -58,8 +58,14 @@ class Source(Enum):
     IHEART = "IHEART"
     LOCAL_MUSIC = "LOCAL_MUSIC"
     BLUETOOTH = "BLUETOOTH"
+    TUNEIN = "TUNEIN"
     UPNP = "UPNP"
 
+
+class SourceStatus(Enum):
+    """Status of a music source"""
+    UNAVAILABLE = "UNAVAILABLE"
+    READY = "READY"
 
 class Type(Enum):
     """Music types.
