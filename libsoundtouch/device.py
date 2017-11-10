@@ -13,7 +13,7 @@ import re
 import requests
 import websocket
 
-from .utils import Key, Type, Source
+from .utils import Key, Type, Source, SourceStatus
 
 STATE_STANDBY = 'STANDBY'
 
@@ -113,6 +113,9 @@ class SoundTouchDevice:
         for listener in listeners:
             listener(value)
 
+    def _on_error(self, web_socket, message):
+        print('ERROR:' + message)
+
     def _on_message(self, web_socket, message):
         # pylint: disable=unused-argument
         """Call when web socket is received."""
@@ -141,6 +144,19 @@ class SoundTouchDevice:
                 self.__init_config()
                 self.__run_listener(self._device_info_updated_listeners,
                                     self._config)
+        elif dom.firstChild.nodeName == "msg":
+            navResp = _get_dom_element(dom, "navigateResponse")
+            if navResp == None:
+                print('No proper response')
+            else:
+                items = _get_dom_element(dom, "items")
+                for item in _get_dom_elements(items, "item"):
+                    mediaItem = MediaItem(item)
+                    pprint(vars(mediaItem))
+                    pprint(vars(mediaItem.media_item_container))
+                    pprint(vars(mediaItem.content_item))
+                    #if mediaItem.playable != SourceStatus.UNAVAILABLE.name:
+                    #    self._sources.append(srcItem)
         else:
             print 'Did not receive an update. Printing the message:'
             print '"' + message.encode('utf-8') + '"'
@@ -164,6 +180,7 @@ class SoundTouchDevice:
         self._zone_status = None
         self._presets = None
         self._ws_client = None
+        self._ws_req_id = 1
         self._volume_updated_listeners = []
         self._status_updated_listeners = []
         self._presets_updated_listeners = []
@@ -181,13 +198,16 @@ class SoundTouchDevice:
         self._ws_client = websocket.WebSocketApp(
             "ws://{0}:{1}/".format(self._host, self._ws_port),
             on_message=self._on_message,
+            on_error=self._on_error,
             subprotocols=['gabbo'])
         ws_thread = WebSocketThread(self._ws_client)
         ws_thread.start()
 
     def stop_notification(self):
         """Stop Websocket connection."""
+        print 'Try stopping it'
         if self._ws_client:
+            print 'stopping it'
             self._ws_client.close()
 
 
@@ -477,8 +497,21 @@ class SoundTouchDevice:
         self._sources = []
         src_root = _get_dom_element(dom, "sources")
         for source in _get_dom_elements(src_root, "sourceItem"):
-            self._sources.append(SourceItem(source))
+            srcItem = SourceItem(source)
+            if srcItem.status != SourceStatus.UNAVAILABLE.name:
+                self._sources.append(srcItem)
 
+    def get_source_content(self,idx):
+        print(str(idx) + ': ' + self._sources[idx].name)
+        src = self._sources[idx]
+        msg = '<msg><header deviceID="' + self._config.device_id + '" url="navigate" method="POST">'
+        msg += '<request requestID="' + str(self._ws_req_id) + '"><info mainNode="navigate" type="new"/>'
+        self._ws_req_id = self._ws_req_id + 1
+        msg += '<sourceItem source="' + src.source_type + '" sourceAccount="' + src.source_account + '"/></request></header><body>'
+        msg += '<navigate source="' + src.source_type + '" sourceAccount="' + src.source_account + '"><startItem>1</startItem></navigate></body></msg>'
+        print('Sending: ' + msg)
+        self._ws_client.send(msg)
+        #<navigateResponse source="STORED_MUSIC" sourceAccount="4d696e69-444c-164e-9d41-f4f26dc5fae7/0">
 
     @property
     def host(self):
@@ -887,6 +920,70 @@ class Status:
         """Station location."""
         return self._station_location
 
+
+class MediaItem:
+    """Media item."""
+
+    def __init__(self, xml_dom):
+        """Create a new media item.
+
+        :param xml_dom: Content item XML DOM
+        """
+        self._name = _get_dom_element_value(xml_dom, "name")
+        self._type = _get_dom_element_value(xml_dom, "type")
+        self._playable = _get_dom_attribute(xml_dom, "Playable") == "1"
+        self._media_item_container = MediaItemContainer(_get_dom_element(xml_dom, "mediaItemContainer"))
+        elems = _get_dom_elements(xml_dom, "ContentItem")
+        for elem in elems:
+            if elem.parentNode == xml_dom:
+                self._content_item = ContentItem()
+
+    @property
+    def name(self):
+        """Name"""
+        return self._name
+
+    @property
+    def type(self):
+        """Type"""
+        return self._type
+
+    @property
+    def playable(self):
+        """Is playable?"""
+        return self._playable
+
+    @property
+    def media_item_container(self):
+        """Returns the media item container"""
+        return self._media_item_container
+
+    @property
+    def content_item(self):
+        """Content item"""
+        return self._content_item
+
+
+class MediaItemContainer:
+    """Media item container."""
+
+    def __init__(self, xml_dom):
+        """Create a new media item container.
+
+        :param xml_dom: Content item XML DOM
+        """
+        self._offset = _get_dom_attribute(xml_dom, "offset")
+        self._content_item = ContentItem(_get_dom_element(xml_dom, "ContentItem"))
+
+    @property
+    def _offset(self):
+        """Name"""
+        return self._offset
+
+    @property
+    def content_item(self):
+        """Content item"""
+        return self._content_item
 
 class ContentItem:
     """Content item."""

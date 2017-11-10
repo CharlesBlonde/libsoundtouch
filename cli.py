@@ -29,14 +29,31 @@ class SoundtouchPrompt(Cmd):
 	def do_sources_get(self,args):
 		"""Get availabe sources"""
 		sources = self._device.sources()
+		i = 0
 		for source in sources:
-			if source.status == SourceStatus.UNAVAILABLE.name:
-				continue
-			print('Name: "' + str(source.name), end='')
+			print('Id: ' + str(i) + ', Name: "' + str(source.name), end='')
 			print('", Status: ' + source.status, end='')
 			print(', Source: ' + get_source_type(source), end='')
 			print(', Local: ' + str(source.local), end='')
 			print(', Source Account: "' + str(source.source_account) + '"')
+			i = i + 1
+
+	def do_sources_show(self,value):
+		"""Show content of a specific source"""
+		if len(value) == 0:
+			print('Please provide an index.')
+			return
+		try:
+			idx = int(value)
+		except ValueError:
+			print('Source has to an integer to base 10')
+			return
+		sources = self._device.sources()
+		if idx < 0 or idx > len(sources):
+			print('Index has to be between 0 and ' + len(sources))
+			return
+		print(sources[idx].name)
+		self._device.get_source_content(idx)
 
 	def do_mute(self, args):
 		"""Mute/Un-mute volume."""
