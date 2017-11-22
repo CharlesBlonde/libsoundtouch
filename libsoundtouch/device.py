@@ -4,7 +4,7 @@
 # pylint: disable=useless-super-delegation,too-many-lines
 
 import logging
-from threading import Thread
+from threading import Thread, Event
 from xml.dom import minidom
 from pprint import pprint
 import os
@@ -114,7 +114,7 @@ class SoundTouchDevice:
             listener(value)
 
     def _on_error(self, web_socket, message):
-        print('ERROR:' + message)
+        print('ERROR(_on_error):' + message)
 
     def _on_message(self, web_socket, message):
         # pylint: disable=unused-argument
@@ -147,19 +147,13 @@ class SoundTouchDevice:
         elif dom.firstChild.nodeName == "msg":
             navResp = _get_dom_element(dom, "navigateResponse")
             if navResp == None:
-                print('No proper response')
+                _LOGGER.error('No proper response')
             else:
-                items = _get_dom_element(dom, "items")
-                for item in _get_dom_elements(items, "item"):
-                    mediaItem = MediaItem(item)
-                    pprint(vars(mediaItem))
-                    pprint(vars(mediaItem.media_item_container))
-                    pprint(vars(mediaItem.content_item))
-                    #if mediaItem.playable != SourceStatus.UNAVAILABLE.name:
-                    #    self._sources.append(srcItem)
+                self._ws_resp = dom
+                self._ws_wait.set()
         else:
-            print 'Did not receive an update. Printing the message:'
-            print '"' + message.encode('utf-8') + '"'
+            _LOGGER.debug('Did not receive an update. Printing the message:')
+            _LOGGER.debug('"' + message.encode('utf-8') + '"')
 
     def __init__(self, host, port=8090, ws_port=8080, dlna_port=8091):
         """Create a new Soundtouch device.
@@ -177,6 +171,7 @@ class SoundTouchDevice:
         self._status = None
         self._volume = None
         self._sources = None
+        self._mediaItems = None
         self._zone_status = None
         self._presets = None
         self._ws_client = None
@@ -186,6 +181,7 @@ class SoundTouchDevice:
         self._presets_updated_listeners = []
         self._zone_status_updated_listeners = []
         self._device_info_updated_listeners = []
+        self._ws_wait = Event()
 
     def __init_config(self):
         response = requests.get(
@@ -492,7 +488,6 @@ class SoundTouchDevice:
         """Refresh volume state."""
         response = requests.get(
             "http://" + self._host + ":" + str(self._port) + "/sources")
-        print response.text
         dom = minidom.parseString(response.text)
         self._sources = []
         src_root = _get_dom_element(dom, "sources")
@@ -502,16 +497,26 @@ class SoundTouchDevice:
                 self._sources.append(srcItem)
 
     def get_source_content(self,idx):
-        print(str(idx) + ': ' + self._sources[idx].name)
         src = self._sources[idx]
         msg = '<msg><header deviceID="' + self._config.device_id + '" url="navigate" method="POST">'
         msg += '<request requestID="' + str(self._ws_req_id) + '"><info mainNode="navigate" type="new"/>'
         self._ws_req_id = self._ws_req_id + 1
         msg += '<sourceItem source="' + src.source_type + '" sourceAccount="' + src.source_account + '"/></request></header><body>'
         msg += '<navigate source="' + src.source_type + '" sourceAccount="' + src.source_account + '"><startItem>1</startItem></navigate></body></msg>'
-        print('Sending: ' + msg)
+        _LOGGER.debug('Sending: ' + msg)
         self._ws_client.send(msg)
-        #<navigateResponse source="STORED_MUSIC" sourceAccount="4d696e69-444c-164e-9d41-f4f26dc5fae7/0">
+        _LOGGER.debug('Waiting for response...')
+        self._ws_wait.wait()
+        resp = self._ws_resp
+        items = _get_dom_element(resp, "items")
+        self._mediaItems = []
+        for item in _get_dom_elements(items, "item"):
+            mediaItem = MediaItem(item)
+            #pprint(vars(mediaItem))
+            #pprint(vars(mediaItem.media_item_container))
+            #pprint(vars(mediaItem.content_item))
+            self._mediaItems.append(mediaItem)
+        return self._mediaItems
 
     @property
     def host(self):
@@ -936,7 +941,7 @@ class MediaItem:
         elems = _get_dom_elements(xml_dom, "ContentItem")
         for elem in elems:
             if elem.parentNode == xml_dom:
-                self._content_item = ContentItem()
+                self._content_item = ContentItem(elem)
 
     @property
     def name(self):

@@ -8,6 +8,7 @@ import sys
 import logging
 from pprint import pprint
 
+_LOGGER = logging.getLogger(__name__)
 
 class SoundtouchPrompt(Cmd):
 
@@ -53,7 +54,11 @@ class SoundtouchPrompt(Cmd):
 			print('Index has to be between 0 and ' + len(sources))
 			return
 		print(sources[idx].name)
-		self._device.get_source_content(idx)
+		items = self._device.get_source_content(idx)
+		i = 0
+		for item in items:
+			print('Id: ' + str(i) + ', Name: "' + str(item.name) + '"')
+			i = i + 1
 
 	def do_mute(self, args):
 		"""Mute/Un-mute volume."""
