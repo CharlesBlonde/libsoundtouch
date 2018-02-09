@@ -195,9 +195,10 @@ def print_status(status):
 	pprint(vars(status.content_item))
 	if status.source == Source.INTERNET_RADIO.name:
 		print('Source: Internet Radio')
-		print('Station: ' + status.station_name + ' from ' + status.station_location)
-		print_play_status(status.play_status, eol='')
-		print('Description: "' + status.description + '"')
+		if status.station_name is not None:
+			print('Station: ' + status.station_name + ' from ' + status.station_location)
+			print('Description: "' + status.description + '"')
+		print_play_status(status.play_status)
 	elif status.source == Source.STORED_MUSIC.name:
 		print('Source: Stored Music')
 		print('Artist - Title: "' + status.artist + '" - "' + status.track + '"')
