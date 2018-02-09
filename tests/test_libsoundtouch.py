@@ -431,7 +431,7 @@ def _mocked_presets(*args, **kwargs):
 
 def _mocked_select_preset(*args, **kwargs):
     if args[0] != "http://192.168.1.1:8090/select" or args[1] not in [
-        '<xml>source</xml>'
+        '<xml>source</xml>'.encode('utf-8')
     ]:
         raise Exception("Unknown call")
 

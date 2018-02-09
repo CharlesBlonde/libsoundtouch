@@ -253,7 +253,8 @@ class SoundTouchDevice:
         """Refresh presets."""
         response = requests.get(
             "http://" + self._host + ":" + str(self._port) + "/presets")
-        dom = minidom.parseString(response.text)
+        response.encoding = 'UTF-8'
+        dom = minidom.parseString(response.text.encode('utf-8'))
         self._presets = []
         for preset in _get_dom_elements(dom, "preset"):
             self._presets.append(Preset(preset))
@@ -275,7 +276,7 @@ class SoundTouchDevice:
         """
         requests.post(
             'http://' + self._host + ":" + str(self._port) + '/select',
-            preset.source_xml)
+            preset.source_xml.encode('utf-8'))
 
     def _create_zone(self, slaves):
         if len(slaves) <= 0:
@@ -962,6 +963,14 @@ class Preset:
     def source_xml(self):
         """XML source."""
         return self._source_xml
+
+    def __repr__(self):
+        """Return a String representation."""
+        fields = [str(self.name.encode('utf-8')), str(self.preset_id),
+                  str(self.source), str(self.type), str(self.location),
+                  str(self.source_account),
+                  str(self.source_xml.encode('utf-8'))]
+        return 'Preset(' + ",".join(fields) + ')'
 
 
 class ZoneStatus:
