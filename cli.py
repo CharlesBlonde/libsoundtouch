@@ -257,12 +257,12 @@ def volume_listener(volume):
 
 # Status updated
 def status_listener(status):
-	print('WebSocket - Status: ')
+	#print('WebSocket - Status: ')
 	print_status(status)
 
 # Presets updated
 def preset_listener(presets):#
-	print('WebSocket - Presets: ')
+	#print('WebSocket - Presets: ')
 	for preset in presets:
 		print(preset.name)
 
