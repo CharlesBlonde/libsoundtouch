@@ -1,14 +1,15 @@
 from __future__ import print_function
+from cmd import Cmd
+from requests.exceptions import ConnectionError
+from pprint import pprint
+import sys
+import logging
+import argparse
+import StringIO
+# Local Imports
 from libsoundtouch import soundtouch_device
 from libsoundtouch.device import get_source_type
 from libsoundtouch.utils import Source, Type, Key, SourceStatus
-from cmd import Cmd
-from requests.exceptions import ConnectionError
-import sys
-import logging
-from pprint import pprint
-import argparse
-import StringIO
 
 logging.basicConfig()
 _LOGGER = logging.getLogger(__name__)
