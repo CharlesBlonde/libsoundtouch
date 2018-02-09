@@ -7,6 +7,7 @@ from requests.exceptions import ConnectionError
 import sys
 import logging
 from pprint import pprint
+import argparse
 
 logging.basicConfig()
 _LOGGER = logging.getLogger(__name__)
@@ -275,11 +276,12 @@ def zone_status_listener(zone_status):
 
 if __name__ == '__main__':
 	global device
-
-	if len(sys.argv) > 1:
-		host = sys.argv[1]
-	else:
-		host = '192.168.111.106'
+	
+	parser = argparse.ArgumentParser()          
+	parser.add_argument('-v', '--verbose', action='store_true', help='Be verbose')
+	parser.add_argument('host', help='IP address or hostname of Bose SoundTouch device', default='192.168.111.106')
+	args = parser.parse_args()                  
+	host = args.host
 	try:
 		device = soundtouch_device(host)
 	except ConnectionError as e:
