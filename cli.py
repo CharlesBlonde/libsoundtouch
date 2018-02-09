@@ -8,6 +8,7 @@ import sys
 import logging
 from pprint import pprint
 import argparse
+import StringIO
 
 logging.basicConfig()
 _LOGGER = logging.getLogger(__name__)
@@ -192,8 +193,10 @@ class SoundtouchPrompt(Cmd):
 		return True
 
 def print_status(status):
-	pprint(vars(status))
-	pprint(vars(status.content_item))
+	varDump = StringIO.StringIO()
+	pprint(vars(status), stream=varDump)
+	pprint(vars(status.content_item), stream=varDump)
+	_LOGGER.debug(varDump.getvalue())
 	if status.source == Source.INTERNET_RADIO.name:
 		print('Source: Internet Radio')
 		if status.station_name is not None:
