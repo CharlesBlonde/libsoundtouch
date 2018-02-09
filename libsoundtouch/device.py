@@ -712,8 +712,9 @@ class Status:
         """
         self._source = _get_dom_element_attribute(xml_dom, "nowPlaying",
                                                   "source")
-        cItem = xml_dom.getElementsByTagName("ContentItem")
-        if cItem:
+        self._content_item = None
+        content_item = xml_dom.getElementsByTagName("ContentItem")
+        if content_item:
             self._content_item = ContentItem(
                 _get_dom_element(xml_dom, "ContentItem"))
         self._track = _get_dom_element_value(xml_dom, "track")

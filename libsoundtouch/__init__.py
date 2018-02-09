@@ -6,9 +6,9 @@ try:
     from queue import Queue, Empty
 except ImportError:
     from Queue import Queue, Empty  # type: ignore
+from zeroconf import Zeroconf, ServiceBrowser
 from libsoundtouch.device import SoundTouchDevice
 from libsoundtouch.utils import SoundtouchDeviceListener
-from zeroconf import Zeroconf, ServiceBrowser
 
 _LOGGER = logging.getLogger(__name__)
 

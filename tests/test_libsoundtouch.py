@@ -182,6 +182,16 @@ def _mocked_status_standby(*args, **kwargs):
 </nowPlaying>""")
 
 
+def _mocked_status_spotify_buffering(*args, **kwargs):
+    if args[0] == 'http://192.168.1.1:8090/now_playing':
+        codecs_open = codecs.open(
+            "tests/data/spotify_buffering.xml", "r", "utf-8")
+        try:
+            return MockResponse(codecs_open.read())
+        finally:
+            codecs_open.close()
+
+
 def _mocked_volume(*args, **kwargs):
     if (args[0] == "http://192.168.1.1:8090/volume"):
         return MockResponse("""<?xml version="1.0" encoding="UTF-8" ?>
@@ -619,6 +629,15 @@ class TestLibSoundTouch(unittest.TestCase):
         self.assertEqual(mocked_device_status.call_count, 1)
         self.assertEqual(status.source, "STANDBY")
         self.assertEqual(status.content_item.source, "STANDBY")
+
+    @mock.patch('requests.get', side_effect=_mocked_status_spotify_buffering)
+    def test_status_buffering(self, mocked_device_status):
+        device = MockDevice("192.168.1.1")
+        status = device.status()
+        self.assertEqual(mocked_device_status.call_count, 1)
+        self.assertEqual(status.source, "SPOTIFY")
+        self.assertEqual(status.play_status, "BUFFERING_STATE")
+        self.assertIsNone(status.content_item)
 
     @mock.patch('requests.get', side_effect=_mocked_volume)
     def test_volume(self, mocked_volume):

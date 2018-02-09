@@ -9,3 +9,4 @@ dist/
 .cache/
 runtime/*
 docs/_build
+.mypy_cache/
