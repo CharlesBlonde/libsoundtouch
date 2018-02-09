@@ -9,6 +9,7 @@ from xml.dom import minidom
 from pprint import pprint
 import os
 import re
+import sys, traceback
 
 import requests
 import websocket
@@ -119,41 +120,46 @@ class SoundTouchDevice:
     def _on_message(self, web_socket, message):
         # pylint: disable=unused-argument
         """Call when web socket is received."""
-        dom = minidom.parseString(message.encode('utf-8'))
-        if dom.firstChild.nodeName == "updates":
-            action_node = dom.firstChild.firstChild
-            action = action_node.nodeName
-            if action == "volumeUpdated":
-                self._volume = Volume(action_node.firstChild)
-                self.__run_listener(self._volume_updated_listeners,
-                                    self._volume)
-            if action == "nowPlayingUpdated":
-                self._status = Status(action_node)
-                self.__run_listener(self._status_updated_listeners,
-                                    self._status)
-            if action == "presetsUpdated" and action_node.hasChildNodes():
-                self._presets = []
-                for preset in _get_dom_elements(dom, "preset"):
-                    self._presets.append(Preset(preset))
-                self.__run_listener(self._presets_updated_listeners,
-                                    self._presets)
-            if action == "zoneUpdated":
-                self.__run_listener(self._zone_status_updated_listeners,
-                                    self.zone_status(True))
-            if action == "infoUpdated":
-                self.__init_config()
-                self.__run_listener(self._device_info_updated_listeners,
-                                    self._config)
-        elif dom.firstChild.nodeName == "msg":
-            navResp = _get_dom_element(dom, "navigateResponse")
-            if navResp == None:
-                _LOGGER.error('No proper response')
-            else:
-                self._ws_resp = dom
-                self._ws_wait.set()
-        else:
-            _LOGGER.debug('Did not receive an update. Printing the message:')
-            _LOGGER.debug('"' + message.encode('utf-8') + '"')
+        try:
+			dom = minidom.parseString(message.encode('utf-8'))
+			if dom.firstChild.nodeName == "updates":
+				action_node = dom.firstChild.firstChild
+				action = action_node.nodeName
+				if action == "volumeUpdated":
+					self._volume = Volume(action_node.firstChild)
+					self.__run_listener(self._volume_updated_listeners,
+										self._volume)
+				if action == "nowPlayingUpdated":
+					self._status = Status(action_node)
+					self.__run_listener(self._status_updated_listeners,
+										self._status)
+				if action == "presetsUpdated" and action_node.hasChildNodes():
+					self._presets = []
+					for preset in _get_dom_elements(dom, "preset"):
+						self._presets.append(Preset(preset))
+					self.__run_listener(self._presets_updated_listeners,
+										self._presets)
+				if action == "zoneUpdated":
+					self.__run_listener(self._zone_status_updated_listeners,
+										self.zone_status(True))
+				if action == "infoUpdated":
+					self.__init_config()
+					self.__run_listener(self._device_info_updated_listeners,
+										self._config)
+			elif dom.firstChild.nodeName == "msg":
+				navResp = _get_dom_element(dom, "navigateResponse")
+				if navResp == None:
+					_LOGGER.error('No proper response')
+				else:
+					self._ws_resp = dom
+					self._ws_wait.set()
+			else:
+				_LOGGER.debug('Did not receive an update. Printing the message:')
+				_LOGGER.debug('"' + message.encode('utf-8') + '"')
+        except Exception as e:
+            exc_type, exc_value, exc_traceback = sys.exc_info()
+            traceback.print_exception(exc_type, exc_value, exc_traceback,
+                              limit=2, file=sys.stdout)
 
     def __init__(self, host, port=8090, ws_port=8080, dlna_port=8091):
         """Create a new Soundtouch device.
