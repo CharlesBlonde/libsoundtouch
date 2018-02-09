@@ -281,6 +281,12 @@ if __name__ == '__main__':
 	parser.add_argument('-v', '--verbose', action='store_true', help='Be verbose')
 	parser.add_argument('host', help='IP address or hostname of Bose SoundTouch device', default='192.168.111.106')
 	args = parser.parse_args()                  
+
+	if args.verbose:                            
+		_LOGGER.setLevel(logging.DEBUG)      
+	else:                                       
+		_LOGGER.setLevel(logging.INFO)
+
 	host = args.host
 	try:
 		device = soundtouch_device(host)
