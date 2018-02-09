@@ -8,6 +8,7 @@ import sys
 import logging
 from pprint import pprint
 
+logging.basicConfig()
 _LOGGER = logging.getLogger(__name__)
 
 class SoundtouchPrompt(Cmd):
