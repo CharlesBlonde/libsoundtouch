@@ -132,7 +132,7 @@ class SoundTouchDevice:
     def __init_config(self):
         response = requests.get(
             "http://" + self._host + ":" + str(self._port) + "/info")
-        dom = minidom.parseString(response.text)
+        dom = minidom.parseString(response.content.decode('utf-8'))
         self._config = Config(dom)
 
     def start_notification(self):
