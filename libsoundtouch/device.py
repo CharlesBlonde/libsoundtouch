@@ -100,10 +100,17 @@ class WebSocketThread(Thread):
         """Create new Websocket thread."""
         Thread.__init__(self)
         self._ws = ws
+        self._should_run = True
+
+	def terminate(self):
+		self._should_run = False
+		self._ws.close()
 
     def run(self):
         """Start Websocket thread."""
-        self._ws.run_forever()
+        while self._should_run:
+			self._ws.run_forever()
+			_LOGGER.debug('WebSocket loop terminated. Try to restart it if _should_run (%d) is True.', self._should_run)
 
 
 class SoundTouchDevice:
@@ -205,15 +212,15 @@ class SoundTouchDevice:
             on_message=self._on_message,
             on_error=self._on_error,
             subprotocols=['gabbo'])
-        ws_thread = WebSocketThread(self._ws_client)
-        ws_thread.start()
+        self._ws_thread = WebSocketThread(self._ws_client)
+        self._ws_thread.start()
 
     def stop_notification(self):
         """Stop Websocket connection."""
         print 'Try stopping it'
         if self._ws_client:
             print 'stopping it'
-            self._ws_client.close()
+            self._ws_thread.terminate()
 
 
     def add_volume_listener(self, listener):
