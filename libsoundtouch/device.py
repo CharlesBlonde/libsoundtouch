@@ -102,15 +102,15 @@ class WebSocketThread(Thread):
         self._ws = ws
         self._should_run = True
 
-	def terminate(self):
-		self._should_run = False
-		self._ws.close()
+    def terminate(self):
+        self._should_run = False
+        self._ws.close()
 
     def run(self):
         """Start Websocket thread."""
         while self._should_run:
-			self._ws.run_forever()
-			_LOGGER.debug('WebSocket loop terminated. Try to restart it if _should_run (%d) is True.', self._should_run)
+            self._ws.run_forever()
+            _LOGGER.debug('WebSocket loop terminated. Try to restart it if _should_run (%d) is True.', self._should_run)
 
 
 class SoundTouchDevice:
