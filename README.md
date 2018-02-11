@@ -176,7 +176,7 @@ time.sleep(600)  # Wait for events
 
 ## Full documentation
 
-[http://libsoundtouch.readthedocs.io] (http://libsoundtouch.readthedocs.io)
+[http://libsoundtouch.readthedocs.io](http://libsoundtouch.readthedocs.io)
 
 ## Incoming features
 
