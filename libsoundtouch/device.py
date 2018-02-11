@@ -6,15 +6,16 @@
 import logging
 import os
 import re
+import sys, traceback
 import xml.etree.cElementTree as ET
+from threading import Thread, Event
 from xml.dom import minidom
-from threading import Thread
+from pprint import pprint
 
 import requests
 import websocket
 
-from libsoundtouch.utils import Source
-from .utils import Key, Type
+from .utils import Key, Type, Source, SourceStatus
 
 STATE_STANDBY = 'STANDBY'
 
@@ -24,6 +25,11 @@ _LOGGER = logging.getLogger(__name__)
 def _get_dom_attribute(xml_dom, attribute, default_value=None):
     if attribute in xml_dom.attributes.keys():
         return xml_dom.attributes[attribute].value
+    return default_value
+
+def _get_dom_value(xml_dom, default_value=None):
+    if xml_dom is not None and xml_dom.firstChild is not None:
+        return xml_dom.firstChild.nodeValue.strip()
     return default_value
 
 
@@ -55,6 +61,37 @@ def _get_dom_element_value(xml_dom, element, default_value=None):
         return element.firstChild.nodeValue.strip()
     return default_value
 
+def get_source_type(source):
+    if source.source_type == Source.SLAVE_SOURCE.name:
+        return "slave"
+    elif source.source_type == Source.PANDORA.name:
+        return "Pandora"
+    elif source.source_type == Source.INTERNET_RADIO.name:
+        return "internet radio"
+    elif source.source_type == Source.AIRPLAY.name:
+        return "Airplay"
+    elif source.source_type == Source.STORED_MUSIC.name:
+        return "stored music"
+    elif source.source_type == Source.AUX.name:
+        return "AUX"
+    elif source.source_type == Source.CURRATED_RADIO.name:
+        return "currated radio"
+    elif source.source_type == Source.DEEZER.name:
+        return "Deezer"
+    elif source.source_type == Source.SPOTIFY.name:
+        return "Spotify"
+    elif source.source_type == Source.IHEART.name:
+        return "iHeart"
+    elif source.source_type == Source.LOCAL_MUSIC.name:
+        return "local music"
+    elif source.source_type == Source.BLUETOOTH.name:
+        return "Bluetooth"
+    elif source.source_type == Source.UPNP.name:
+        return "UPNP"
+    elif source.source_type == Source.TUNEIN.name:
+        return "TuneIn"
+    else:
+        return "UNKNOWN"
 
 class WebSocketThread(Thread):
     """Websocket thread."""
@@ -63,10 +100,17 @@ class WebSocketThread(Thread):
         """Create new Websocket thread."""
         Thread.__init__(self)
         self._ws = ws
+        self._should_run = True
+
+    def terminate(self):
+        self._should_run = False
+        self._ws.close()
 
     def run(self):
         """Start Websocket thread."""
-        self._ws.run_forever()
+        while self._should_run:
+            self._ws.run_forever()
+            _LOGGER.debug('WebSocket loop terminated. Try to restart it if _should_run (%d) is True.', self._should_run)
 
 
 class SoundTouchDevice:
@@ -78,34 +122,52 @@ class SoundTouchDevice:
         for listener in listeners:
             listener(value)
 
+    def _on_error(self, web_socket, message):
+        print('ERROR(_on_error):' + str(message))
+
     def _on_message(self, web_socket, message):
         # pylint: disable=unused-argument
         """Call when web socket is received."""
-        dom = minidom.parseString(message.encode('utf-8'))
-        if dom.firstChild.nodeName == "updates":
-            action_node = dom.firstChild.firstChild
-            action = action_node.nodeName
-            if action == "volumeUpdated":
-                self._volume = Volume(action_node.firstChild)
-                self.__run_listener(self._volume_updated_listeners,
-                                    self._volume)
-            if action == "nowPlayingUpdated":
-                self._status = Status(action_node)
-                self.__run_listener(self._status_updated_listeners,
-                                    self._status)
-            if action == "presetsUpdated" and action_node.hasChildNodes():
-                self._presets = []
-                for preset in _get_dom_elements(dom, "preset"):
-                    self._presets.append(Preset(preset))
-                self.__run_listener(self._presets_updated_listeners,
-                                    self._presets)
-            if action == "zoneUpdated":
-                self.__run_listener(self._zone_status_updated_listeners,
-                                    self.zone_status(True))
-            if action == "infoUpdated":
-                self.__init_config()
-                self.__run_listener(self._device_info_updated_listeners,
-                                    self._config)
+        try:
+			dom = minidom.parseString(message.encode('utf-8'))
+			if dom.firstChild.nodeName == "updates":
+				action_node = dom.firstChild.firstChild
+				action = action_node.nodeName
+				if action == "volumeUpdated":
+					self._volume = Volume(action_node.firstChild)
+					self.__run_listener(self._volume_updated_listeners,
+										self._volume)
+				if action == "nowPlayingUpdated":
+					self._status = Status(action_node)
+					self.__run_listener(self._status_updated_listeners,
+										self._status)
+				if action == "presetsUpdated" and action_node.hasChildNodes():
+					self._presets = []
+					for preset in _get_dom_elements(dom, "preset"):
+						self._presets.append(Preset(preset))
+					self.__run_listener(self._presets_updated_listeners,
+										self._presets)
+				if action == "zoneUpdated":
+					self.__run_listener(self._zone_status_updated_listeners,
+										self.zone_status(True))
+				if action == "infoUpdated":
+					self.__init_config()
+					self.__run_listener(self._device_info_updated_listeners,
+										self._config)
+			elif dom.firstChild.nodeName == "msg":
+				navResp = _get_dom_element(dom, "navigateResponse")
+				if navResp == None:
+					_LOGGER.error('No proper response')
+				else:
+					self._ws_resp = dom
+					self._ws_wait.set()
+			else:
+				_LOGGER.debug('Did not receive an update. Printing the message:')
+				_LOGGER.debug('"' + message.encode('utf-8') + '"')
+        except Exception as e:
+            exc_type, exc_value, exc_traceback = sys.exc_info()
+            traceback.print_exception(exc_type, exc_value, exc_traceback,
+                              limit=2, file=sys.stdout)
 
     def __init__(self, host, port=8090, ws_port=8080, dlna_port=8091):
         """Create a new Soundtouch device.
@@ -122,14 +184,18 @@ class SoundTouchDevice:
         self.__init_config()
         self._status = None
         self._volume = None
+        self._sources = None
+        self._mediaItems = None
         self._zone_status = None
         self._presets = None
         self._ws_client = None
+        self._ws_req_id = 1
         self._volume_updated_listeners = []
         self._status_updated_listeners = []
         self._presets_updated_listeners = []
         self._zone_status_updated_listeners = []
         self._device_info_updated_listeners = []
+        self._ws_wait = Event()
         self._snapshot = None
 
     def __init_config(self):
@@ -144,9 +210,18 @@ class SoundTouchDevice:
         self._ws_client = websocket.WebSocketApp(
             "ws://{0}:{1}/".format(self._host, self._ws_port),
             on_message=self._on_message,
+            on_error=self._on_error,
             subprotocols=['gabbo'])
-        ws_thread = WebSocketThread(self._ws_client)
-        ws_thread.start()
+        self._ws_thread = WebSocketThread(self._ws_client)
+        self._ws_thread.start()
+
+    def stop_notification(self):
+        """Stop Websocket connection."""
+        print 'Try stopping it'
+        if self._ws_client:
+            print 'stopping it'
+            self._ws_thread.terminate()
+
 
     def add_volume_listener(self, listener):
         """Add a new volume updated listener."""
@@ -447,6 +522,49 @@ class SoundTouchDevice:
                 "http://{0}:{1}/AVTransport/Control".format(self.host,
                                                             self.dlna_port),
                 data=body, headers=headers)
+
+    def sources(self, refresh=True):
+        """Get available sources.
+
+        :param refresh: Force refresh, else return old data.
+        """
+        if self._sources is None or refresh:
+            self.refresh_sources()
+        return self._sources
+
+    def refresh_sources(self):
+        """Refresh volume state."""
+        response = requests.get(
+            "http://" + self._host + ":" + str(self._port) + "/sources")
+        dom = minidom.parseString(response.text)
+        self._sources = []
+        src_root = _get_dom_element(dom, "sources")
+        for source in _get_dom_elements(src_root, "sourceItem"):
+            srcItem = SourceItem(source)
+            if srcItem.status != SourceStatus.UNAVAILABLE.name:
+                self._sources.append(srcItem)
+
+    def get_source_content(self,idx):
+        src = self._sources[idx]
+        msg = '<msg><header deviceID="' + self._config.device_id + '" url="navigate" method="POST">'
+        msg += '<request requestID="' + str(self._ws_req_id) + '"><info mainNode="navigate" type="new"/>'
+        self._ws_req_id = self._ws_req_id + 1
+        msg += '<sourceItem source="' + src.source_type + '" sourceAccount="' + src.source_account + '"/></request></header><body>'
+        msg += '<navigate source="' + src.source_type + '" sourceAccount="' + src.source_account + '"><startItem>1</startItem></navigate></body></msg>'
+        _LOGGER.debug('Sending: ' + msg)
+        self._ws_client.send(msg)
+        _LOGGER.debug('Waiting for response...')
+        self._ws_wait.wait()
+        resp = self._ws_resp
+        items = _get_dom_element(resp, "items")
+        self._mediaItems = []
+        for item in _get_dom_elements(items, "item"):
+            mediaItem = MediaItem(item)
+            #pprint(vars(mediaItem))
+            #pprint(vars(mediaItem.media_item_container))
+            #pprint(vars(mediaItem.content_item))
+            self._mediaItems.append(mediaItem)
+        return self._mediaItems
 
     @property
     def host(self):
@@ -885,6 +1003,70 @@ class Status:
         return 'Status(' + ",".join(fields) + ')'
 
 
+class MediaItem:
+    """Media item."""
+
+    def __init__(self, xml_dom):
+        """Create a new media item.
+
+        :param xml_dom: Content item XML DOM
+        """
+        self._name = _get_dom_element_value(xml_dom, "name")
+        self._type = _get_dom_element_value(xml_dom, "type")
+        self._playable = _get_dom_attribute(xml_dom, "Playable") == "1"
+        self._media_item_container = MediaItemContainer(_get_dom_element(xml_dom, "mediaItemContainer"))
+        elems = _get_dom_elements(xml_dom, "ContentItem")
+        for elem in elems:
+            if elem.parentNode == xml_dom:
+                self._content_item = ContentItem(elem)
+
+    @property
+    def name(self):
+        """Name"""
+        return self._name
+
+    @property
+    def type(self):
+        """Type"""
+        return self._type
+
+    @property
+    def playable(self):
+        """Is playable?"""
+        return self._playable
+
+    @property
+    def media_item_container(self):
+        """Returns the media item container"""
+        return self._media_item_container
+
+    @property
+    def content_item(self):
+        """Content item"""
+        return self._content_item
+
+
+class MediaItemContainer:
+    """Media item container."""
+
+    def __init__(self, xml_dom):
+        """Create a new media item container.
+
+        :param xml_dom: Content item XML DOM
+        """
+        self._offset = _get_dom_attribute(xml_dom, "offset")
+        self._content_item = ContentItem(_get_dom_element(xml_dom, "ContentItem"))
+
+    @property
+    def _offset(self):
+        """Name"""
+        return self._offset
+
+    @property
+    def content_item(self):
+        """Content item"""
+        return self._content_item
+
 class ContentItem:
     """Content item."""
 
@@ -939,6 +1121,51 @@ class ContentItem:
         formated_fields = [str(f) for f in fields]
         return 'ContentItem(' + ",".join(formated_fields) + ')'
 
+
+class SourceItem:
+    """Bose Soundtouch source."""
+
+    def __init__(self, xml_dom):
+        """Create a new Bose Soundtouch source.
+
+        :param xml_dom: source configuration XML DOM
+        """
+        self._source = _get_dom_attribute(xml_dom, "source")
+        self._status = _get_dom_attribute(xml_dom, "status")
+        self._local = _get_dom_attribute(xml_dom, "isLocal") == "true"
+        self._multiroomallowed = _get_dom_attribute(xml_dom, "multiroomallowed") == "true"
+        self._sourceAccount = _get_dom_attribute(xml_dom, "sourceAccount")
+        self._name = _get_dom_value(xml_dom)
+
+    @property
+    def source_type(self):
+        """Source type"""
+        return self._source
+
+    @property
+    def status(self):
+        """Status of this source"""
+        return self._status
+
+    @property
+    def local(self):
+        """IS this a local source?"""
+        return self._local
+
+    @property
+    def multiroomallowed(self):
+        """Is multiroom for this source allowed?"""
+        return self._multiroomallowed
+
+    @property
+    def source_account(self):
+        """Account to log in to the service"""
+        return self._sourceAccount
+
+    @property
+    def name(self):
+        """Name"""
+        return self._name
 
 class Volume:
     """Volume configuration."""
