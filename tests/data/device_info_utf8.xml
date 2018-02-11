@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<info deviceID="00112233445566">
+    <name>Küche</name>
+    <type>SoundTouch 20</type>
+    <margeAccountUUID>AccountUUIDValue</margeAccountUUID>
+    <components>
+        <component>
+            <componentCategory>SCM</componentCategory>
+            <softwareVersion>
+                13.0.9.29919.1889959 epdbuild.trunk.cepeswbldXXX
+            </softwareVersion>
+            <serialNumber>XXXXX</serialNumber>
+        </component>
+        <component>
+            <componentCategory>PackagedProduct</componentCategory>
+            <serialNumber>YYYYY</serialNumber>
+        </component>
+    </components>
+    <margeURL>https://streaming.bose.com</margeURL>
+    <networkInfo type="SCM">
+        <macAddress>00112233445566</macAddress>
+        <ipAddress>192.168.1.2</ipAddress>
+    </networkInfo>
+    <networkInfo type="SMSC">
+        <macAddress>66554433221100</macAddress>
+        <ipAddress>192.168.1.1</ipAddress>
+    </networkInfo>
+    <moduleType>sm2</moduleType>
+    <variant>spotty</variant>
+    <variantMode>normal</variantMode>
+    <countryCode>GB</countryCode>
+    <regionCode>GB</regionCode>
+</info>

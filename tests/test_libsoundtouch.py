@@ -68,39 +68,21 @@ class MockPreset(Preset):
 
 def _mocked_device_info(*args, **kwargs):
     if args[0] == 'http://192.168.1.1:8090/info':
-        return MockResponse("""<?xml version="1.0" encoding="UTF-8" ?>
-<info deviceID="00112233445566">
-    <name>Home</name>
-    <type>SoundTouch 20</type>
-    <margeAccountUUID>AccountUUIDValue</margeAccountUUID>
-    <components>
-        <component>
-            <componentCategory>SCM</componentCategory>
-            <softwareVersion>
-                13.0.9.29919.1889959 epdbuild.trunk.cepeswbldXXX
-            </softwareVersion>
-            <serialNumber>XXXXX</serialNumber>
-        </component>
-        <component>
-            <componentCategory>PackagedProduct</componentCategory>
-            <serialNumber>YYYYY</serialNumber>
-        </component>
-    </components>
-    <margeURL>https://streaming.bose.com</margeURL>
-    <networkInfo type="SCM">
-        <macAddress>00112233445566</macAddress>
-        <ipAddress>192.168.1.2</ipAddress>
-    </networkInfo>
-    <networkInfo type="SMSC">
-        <macAddress>66554433221100</macAddress>
-        <ipAddress>192.168.1.1</ipAddress>
-    </networkInfo>
-    <moduleType>sm2</moduleType>
-    <variant>spotty</variant>
-    <variantMode>normal</variantMode>
-    <countryCode>GB</countryCode>
-    <regionCode>GB</regionCode>
-</info>""")
+        codecs_open = codecs.open("tests/data/device_info.xml", "r", "utf-8")
+        try:
+            return MockResponse(codecs_open.read())
+        finally:
+            codecs_open.close()
+
+
+def _mocked_device_info_utf8(*args, **kwargs):
+    if args[0] == 'http://192.168.1.1:8090/info':
+        codecs_open = codecs.open("tests/data/device_info_utf8.xml", "r",
+                                  "utf-8")
+        try:
+            return MockResponse(codecs_open.read())
+        finally:
+            codecs_open.close()
 
 
 def _mocked_device_info_without_values(*args, **kwargs):
@@ -515,6 +497,39 @@ class TestLibSoundTouch(unittest.TestCase):
         self.assertEqual(device.config.device_ip, "192.168.1.1")
         self.assertEqual(device.config.mac_address, "66554433221100")
         self.assertEqual(device.config.name, "Home")
+        self.assertEqual(device.config.type, "SoundTouch 20")
+        self.assertEqual(device.config.account_uuid, "AccountUUIDValue")
+        self.assertEqual(device.config.module_type, "sm2")
+        self.assertEqual(device.config.variant, "spotty")
+        self.assertEqual(device.config.variant_mode, "normal")
+        self.assertEqual(device.config.country_code, "GB")
+        self.assertEqual(device.config.region_code, "GB")
+        self.assertEqual(len(device.config.networks), 2)
+        self.assertEqual(len(device.config.components), 2)
+        self.assertListEqual(
+            [component.category for component in device.config.components],
+            ['SCM', 'PackagedProduct'])
+        self.assertListEqual(
+            [component.serial_number for component in
+             device.config.components],
+            ['XXXXX', 'YYYYY'])
+        self.assertListEqual(
+            [component.software_version for component in
+             device.config.components],
+            ['13.0.9.29919.1889959 epdbuild.trunk.cepeswbldXXX', None])
+
+    @mock.patch('requests.get', side_effect=_mocked_device_info_utf8)
+    def test_init_device_utf8(self, mocked_device_info):
+        device = libsoundtouch.soundtouch_device("192.168.1.1")
+        self.assertEqual(mocked_device_info.call_count, 1)
+        self.assertEqual(device.host, "192.168.1.1")
+        self.assertEqual(device.port, 8090)
+        self.assertEqual(device.ws_port, 8080)
+        self.assertEqual(device.dlna_port, 8091)
+        self.assertEqual(device.config.device_id, "00112233445566")
+        self.assertEqual(device.config.device_ip, "192.168.1.1")
+        self.assertEqual(device.config.mac_address, "66554433221100")
+        self.assertEqual(device.config.name, u'Küche')
         self.assertEqual(device.config.type, "SoundTouch 20")
         self.assertEqual(device.config.account_uuid, "AccountUUIDValue")
         self.assertEqual(device.config.module_type, "sm2")
