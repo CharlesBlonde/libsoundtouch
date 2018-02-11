@@ -116,7 +116,7 @@ class SoundTouchDevice:
             listener(value)
 
     def _on_error(self, web_socket, message):
-        print('ERROR(_on_error):' + message)
+        print('ERROR(_on_error):' + str(message))
 
     def _on_message(self, web_socket, message):
         # pylint: disable=unused-argument
