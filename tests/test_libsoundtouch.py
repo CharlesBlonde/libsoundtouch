@@ -212,28 +212,28 @@ def _mocked_play(*args, **kwargs):
 
 def _mocked_play_media_without_account(*args, **kwargs):
     if args[0] != "http://192.168.1.1:8090/select" or \
-                    args[1] != '<ContentItem source="INTERNET_RADIO" ' \
-                               'type="uri" sourceAccount="" location="4712">' \
-                               '<itemName>Select using API</itemName>' \
-                               '</ContentItem>':
+            args[1] != '<ContentItem source="INTERNET_RADIO" ' \
+                       'type="uri" sourceAccount="" location="4712">' \
+                       '<itemName>Select using API</itemName>' \
+                       '</ContentItem>':
         raise Exception("Unknown call")
 
 
 def _mocked_play_media_with_account(*args, **kwargs):
     if args[0] != "http://192.168.1.1:8090/select" or \
-                    args[1] != '<ContentItem source="SPOTIFY" type="uri" ' \
-                               'sourceAccount="spot_user_id" ' \
-                               'location="uri_track"><itemName>' \
-                               'Select using API</itemName></ContentItem>':
+            args[1] != '<ContentItem source="SPOTIFY" type="uri" ' \
+                       'sourceAccount="spot_user_id" ' \
+                       'location="uri_track"><itemName>' \
+                       'Select using API</itemName></ContentItem>':
         raise Exception("Unknown call")
 
 
 def _mocked_play_media_with_type(*args, **kwargs):
     if args[0] != "http://192.168.1.1:8090/select" or \
-                    args[1] != '<ContentItem source="LOCAL_MUSIC" ' \
-                               'type="album" sourceAccount="account_id" ' \
-                               'location="album:1"><itemName>' \
-                               'Select using API</itemName></ContentItem>':
+            args[1] != '<ContentItem source="LOCAL_MUSIC" ' \
+                       'type="album" sourceAccount="account_id" ' \
+                       'location="album:1"><itemName>' \
+                       'Select using API</itemName></ContentItem>':
         raise Exception("Unknown call")
 
 
@@ -469,6 +469,29 @@ def _mocked_service_browser(zc, search, listener):
     service_info.port = 8090
     mock_zeroconf.get_service_info.return_value = service_info
     listener.add_service(mock_zeroconf, '', 'device.tcp')
+
+
+def _mocked_select_bluetooth(*args, **kwargs):
+    if args[0] != "http://192.168.1.1:8090/select" or args[1] not in [
+        '<ContentItem source="BLUETOOTH" />'
+    ]:
+        raise Exception("Unknown call")
+
+
+def _mocked_select_aux(*args, **kwargs):
+    if args[0] != "http://192.168.1.1:8090/select" or args[1] not in [
+        '<ContentItem source="AUX" sourceAccount="AUX" />'
+    ]:
+        raise Exception("Unknown call")
+
+
+def _mocked_select_content_item(*args, **kwargs):
+    if args[0] != "http://192.168.1.1:8090/select" or args[1] not in [
+        '<ContentItem location="spotify:artist:2ye2Wgw4gimLv2eAKyk1NB" '
+        'source="SPOTIFY" '
+        'sourceAccount="spotify_account" type="uri" />'
+    ]:
+        raise Exception("Unknown call")
 
 
 class TestLibSoundTouch(unittest.TestCase):
@@ -1098,3 +1121,33 @@ class TestLibSoundTouch(unittest.TestCase):
         self.assertEqual(len(devices), 1)
         self.assertEqual(devices[0].host, "192.168.1.1")
         self.assertEqual(devices[0].port, 8090)
+
+    @mock.patch('requests.post', side_effect=_mocked_select_bluetooth)
+    def test_select_bluetooth(self, mocked_select_bluetooth):
+        device = MockDevice("192.168.1.1")
+        device.select_source_bluetooth()
+        self.assertEqual(mocked_select_bluetooth.call_count, 1)
+
+    @mock.patch('requests.post', side_effect=_mocked_select_aux)
+    def test_select_aux(self, mocked_select_aux):
+        device = MockDevice("192.168.1.1")
+        device.select_source_aux()
+        self.assertEqual(mocked_select_aux.call_count, 1)
+
+    @mock.patch('requests.post', side_effect=_mocked_select_content_item)
+    def test_select_content_item(self, mocked_select_content_item):
+        device = MockDevice("192.168.1.1")
+        device.select_content_item(Source.SPOTIFY, "spotify_account",
+                                   "spotify:artist:2ye2Wgw4gimLv2eAKyk1NB",
+                                   "uri")
+        self.assertEqual(mocked_select_content_item.call_count, 1)
+
+    @mock.patch('requests.get', side_effect=_mocked_status_spotify)
+    @mock.patch('requests.post', side_effect=_mocked_select_content_item)
+    def test_snapshot_restore(self, mocked_device_status,
+                              mocked_select_content_item):
+        device = MockDevice("192.168.1.1")
+        device.snapshot()
+        device.restore()
+        self.assertEqual(mocked_device_status.call_count, 1)
+        self.assertEqual(mocked_select_content_item.call_count, 1)

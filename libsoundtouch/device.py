@@ -4,14 +4,16 @@
 # pylint: disable=useless-super-delegation,too-many-lines
 
 import logging
-from threading import Thread
-from xml.dom import minidom
 import os
 import re
+import xml.etree.cElementTree as ET
+from xml.dom import minidom
+from threading import Thread
 
 import requests
 import websocket
 
+from libsoundtouch.utils import Source
 from .utils import Key, Type
 
 STATE_STANDBY = 'STANDBY'
@@ -128,6 +130,7 @@ class SoundTouchDevice:
         self._presets_updated_listeners = []
         self._zone_status_updated_listeners = []
         self._device_info_updated_listeners = []
+        self._snapshot = None
 
     def __init_config(self):
         response = requests.get(
@@ -277,6 +280,37 @@ class SoundTouchDevice:
         requests.post(
             'http://' + self._host + ":" + str(self._port) + '/select',
             preset.source_xml.encode('utf-8'))
+
+    def select_content_item(self, source, source_account=None, location=None,
+                            media_type=None):
+        """Select specified content.
+
+        :param source The source
+        :param source_account The source account
+        :param location The location
+        :param media_type The media type
+        """
+        attributes = {"source": source.value}
+        if source_account:
+            attributes["sourceAccount"] = source_account
+        if location:
+            attributes["location"] = location
+        if media_type:
+            attributes["type"] = media_type
+        root = ET.Element("ContentItem", attributes)
+
+        content = ET.tostring(root).decode("UTF-8")
+        requests.post(
+            'http://' + self._host + ":" + str(self._port) + '/select',
+            content)
+
+    def select_source_aux(self):
+        """Select AUX source."""
+        self.select_content_item(Source.AUX, Source.AUX.value)
+
+    def select_source_bluetooth(self):
+        """Select BLUETOOTH source."""
+        self.select_content_item(Source.BLUETOOTH)
 
     def _create_zone(self, slaves):
         if len(slaves) <= 0:
@@ -544,6 +578,20 @@ class SoundTouchDevice:
         """Power off device."""
         if self.status().source != STATE_STANDBY:
             self._send_key(Key.POWER.value)
+
+    def snapshot(self):
+        """Snapshot current playing media."""
+        status = self.status(refresh=True)
+        if status and status.content_item:
+            self._snapshot = status.content_item
+
+    def restore(self):
+        """Restore last snapshot."""
+        if self._snapshot:
+            self.select_content_item(Source[self._snapshot.source],
+                                     self._snapshot.source_account,
+                                     self._snapshot.location,
+                                     self._snapshot.type)
 
 
 class Config:
@@ -823,6 +871,18 @@ class Status:
         """Station location."""
         return self._station_location
 
+    def __repr__(self):
+        """Return a String representation."""
+        fields = [str(self.source.encode('utf-8')), str(self.content_item),
+                  str(self.track), str(self.artist), str(self.album),
+                  str(self.artist), str(self.image), str(self.duration),
+                  str(self.position), str(self.duration),
+                  str(self.play_status), str(self.shuffle_setting),
+                  str(self.repeat_setting), str(self.stream_type),
+                  str(self.track_id), str(self.station_name),
+                  str(self.station_location)]
+        return 'Status(' + ",".join(fields) + ')'
+
 
 class ContentItem:
     """Content item."""
@@ -869,6 +929,14 @@ class ContentItem:
     def is_presetable(self):
         """Return true if presetable."""
         return self._is_presetable
+
+    def __repr__(self):
+        """Return a String representation."""
+        fields = [self.name.encode('UTF-8') if self.name else self.name,
+                  self.source, self.location, self.source_account,
+                  self.is_presetable]
+        formated_fields = [str(f) for f in fields]
+        return 'ContentItem(' + ",".join(formated_fields) + ')'
 
 
 class Volume:
@@ -966,11 +1034,12 @@ class Preset:
 
     def __repr__(self):
         """Return a String representation."""
-        fields = [str(self.name.encode('utf-8')), str(self.preset_id),
-                  str(self.source), str(self.type), str(self.location),
-                  str(self.source_account),
-                  str(self.source_xml.encode('utf-8'))]
-        return 'Preset(' + ",".join(fields) + ')'
+        fields = [self.name if self.name else self.name,
+                  self.preset_id, self.source, self.type,
+                  self.location, self.source_account,
+                  self.source_xml.encode('utf-8')]
+        formated_fields = [str(f) for f in fields]
+        return 'Preset(' + ",".join(formated_fields) + ')'
 
 
 class ZoneStatus:
