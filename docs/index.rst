@@ -28,8 +28,10 @@ Features
 -  volume setting (mute/set volume/volume up/volume down)
 -  repeat one/all/off
 -  shuffle on/off
+-  select AUX/Bluetooth inputs
 -  select preset (bookmark)
 -  playback selected music
+-  allow snapshot and restore playing content
 -  play HTTP URL (not HTTPS)
 -  Multi room (zones)
 -  Websocket notifications
@@ -108,6 +110,17 @@ Basic Usage
       'album:1',
       account_id,
       Type.ALBUM)
+
+   # Snapshot current playing
+   device.snapshot()
+
+   # Select AUX input
+   device.select_source_aux()
+   # Select Bluetooth input
+   device.select_source_bluetooth()
+
+   # Restore previous snapshot
+   device.restore()
 
    # Play an HTTP URL (not HTTPS)
    device.play_url('http://fqdn/file.mp3')

@@ -1,3 +1,14 @@
+Version 0.8.0
+~~~~~~~~~~~~~
+
+:Date:
+    2018/02/11
+
+    -  Fix: New API content with latest firmware
+    -  Fix: Device names with UTF-8 characters
+    -  Allow to select AUX/Bluetooth inputs
+    -  Add snapshotting/restore feature
+
 Version 0.7.2
 ~~~~~~~~~~~~~
 
