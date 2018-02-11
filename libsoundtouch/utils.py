@@ -60,6 +60,7 @@ class Source(Enum):
     BLUETOOTH = "BLUETOOTH"
     TUNEIN = "TUNEIN"
     UPNP = "UPNP"
+    INVALID_SOURCE = "INVALID_SOURCE"
 
 
 class SourceStatus(Enum):

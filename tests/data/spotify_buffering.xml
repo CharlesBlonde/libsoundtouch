@@ -1,0 +1,6 @@
+<nowPlayingUpdated>
+    <nowPlaying deviceID="11223344" source="SPOTIFY" sourceAccount="spotify_account">
+        <art artImageStatus="SHOW_DEFAULT_IMAGE"/>
+        <playStatus>BUFFERING_STATE</playStatus>
+    </nowPlaying>
+</nowPlayingUpdated>

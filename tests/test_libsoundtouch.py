@@ -68,39 +68,21 @@ class MockPreset(Preset):
 
 def _mocked_device_info(*args, **kwargs):
     if args[0] == 'http://192.168.1.1:8090/info':
-        return MockResponse("""<?xml version="1.0" encoding="UTF-8" ?>
-<info deviceID="00112233445566">
-    <name>Home</name>
-    <type>SoundTouch 20</type>
-    <margeAccountUUID>AccountUUIDValue</margeAccountUUID>
-    <components>
-        <component>
-            <componentCategory>SCM</componentCategory>
-            <softwareVersion>
-                13.0.9.29919.1889959 epdbuild.trunk.cepeswbldXXX
-            </softwareVersion>
-            <serialNumber>XXXXX</serialNumber>
-        </component>
-        <component>
-            <componentCategory>PackagedProduct</componentCategory>
-            <serialNumber>YYYYY</serialNumber>
-        </component>
-    </components>
-    <margeURL>https://streaming.bose.com</margeURL>
-    <networkInfo type="SCM">
-        <macAddress>00112233445566</macAddress>
-        <ipAddress>192.168.1.2</ipAddress>
-    </networkInfo>
-    <networkInfo type="SMSC">
-        <macAddress>66554433221100</macAddress>
-        <ipAddress>192.168.1.1</ipAddress>
-    </networkInfo>
-    <moduleType>sm2</moduleType>
-    <variant>spotty</variant>
-    <variantMode>normal</variantMode>
-    <countryCode>GB</countryCode>
-    <regionCode>GB</regionCode>
-</info>""")
+        codecs_open = codecs.open("tests/data/device_info.xml", "r", "utf-8")
+        try:
+            return MockResponse(codecs_open.read())
+        finally:
+            codecs_open.close()
+
+
+def _mocked_device_info_utf8(*args, **kwargs):
+    if args[0] == 'http://192.168.1.1:8090/info':
+        codecs_open = codecs.open("tests/data/device_info_utf8.xml", "r",
+                                  "utf-8")
+        try:
+            return MockResponse(codecs_open.read())
+        finally:
+            codecs_open.close()
 
 
 def _mocked_device_info_without_values(*args, **kwargs):
@@ -182,6 +164,16 @@ def _mocked_status_standby(*args, **kwargs):
 </nowPlaying>""")
 
 
+def _mocked_status_spotify_buffering(*args, **kwargs):
+    if args[0] == 'http://192.168.1.1:8090/now_playing':
+        codecs_open = codecs.open(
+            "tests/data/spotify_buffering.xml", "r", "utf-8")
+        try:
+            return MockResponse(codecs_open.read())
+        finally:
+            codecs_open.close()
+
+
 def _mocked_volume(*args, **kwargs):
     if (args[0] == "http://192.168.1.1:8090/volume"):
         return MockResponse("""<?xml version="1.0" encoding="UTF-8" ?>
@@ -202,28 +194,28 @@ def _mocked_play(*args, **kwargs):
 
 def _mocked_play_media_without_account(*args, **kwargs):
     if args[0] != "http://192.168.1.1:8090/select" or \
-                    args[1] != '<ContentItem source="INTERNET_RADIO" ' \
-                               'type="uri" sourceAccount="" location="4712">' \
-                               '<itemName>Select using API</itemName>' \
-                               '</ContentItem>':
+            args[1] != '<ContentItem source="INTERNET_RADIO" ' \
+                       'type="uri" sourceAccount="" location="4712">' \
+                       '<itemName>Select using API</itemName>' \
+                       '</ContentItem>':
         raise Exception("Unknown call")
 
 
 def _mocked_play_media_with_account(*args, **kwargs):
     if args[0] != "http://192.168.1.1:8090/select" or \
-                    args[1] != '<ContentItem source="SPOTIFY" type="uri" ' \
-                               'sourceAccount="spot_user_id" ' \
-                               'location="uri_track"><itemName>' \
-                               'Select using API</itemName></ContentItem>':
+            args[1] != '<ContentItem source="SPOTIFY" type="uri" ' \
+                       'sourceAccount="spot_user_id" ' \
+                       'location="uri_track"><itemName>' \
+                       'Select using API</itemName></ContentItem>':
         raise Exception("Unknown call")
 
 
 def _mocked_play_media_with_type(*args, **kwargs):
     if args[0] != "http://192.168.1.1:8090/select" or \
-                    args[1] != '<ContentItem source="LOCAL_MUSIC" ' \
-                               'type="album" sourceAccount="account_id" ' \
-                               'location="album:1"><itemName>' \
-                               'Select using API</itemName></ContentItem>':
+            args[1] != '<ContentItem source="LOCAL_MUSIC" ' \
+                       'type="album" sourceAccount="account_id" ' \
+                       'location="album:1"><itemName>' \
+                       'Select using API</itemName></ContentItem>':
         raise Exception("Unknown call")
 
 
@@ -421,7 +413,7 @@ def _mocked_presets(*args, **kwargs):
 
 def _mocked_select_preset(*args, **kwargs):
     if args[0] != "http://192.168.1.1:8090/select" or args[1] not in [
-        '<xml>source</xml>'
+        '<xml>source</xml>'.encode('utf-8')
     ]:
         raise Exception("Unknown call")
 
@@ -461,6 +453,29 @@ def _mocked_service_browser(zc, search, listener):
     listener.add_service(mock_zeroconf, '', 'device.tcp')
 
 
+def _mocked_select_bluetooth(*args, **kwargs):
+    if args[0] != "http://192.168.1.1:8090/select" or args[1] not in [
+        '<ContentItem source="BLUETOOTH" />'
+    ]:
+        raise Exception("Unknown call")
+
+
+def _mocked_select_aux(*args, **kwargs):
+    if args[0] != "http://192.168.1.1:8090/select" or args[1] not in [
+        '<ContentItem source="AUX" sourceAccount="AUX" />'
+    ]:
+        raise Exception("Unknown call")
+
+
+def _mocked_select_content_item(*args, **kwargs):
+    if args[0] != "http://192.168.1.1:8090/select" or args[1] not in [
+        '<ContentItem location="spotify:artist:2ye2Wgw4gimLv2eAKyk1NB" '
+        'source="SPOTIFY" '
+        'sourceAccount="spotify_account" type="uri" />'
+    ]:
+        raise Exception("Unknown call")
+
+
 class TestLibSoundTouch(unittest.TestCase):
     def setUp(self):  # pylint: disable=invalid-name
         """Setup things to be run when tests are started."""
@@ -482,6 +497,39 @@ class TestLibSoundTouch(unittest.TestCase):
         self.assertEqual(device.config.device_ip, "192.168.1.1")
         self.assertEqual(device.config.mac_address, "66554433221100")
         self.assertEqual(device.config.name, "Home")
+        self.assertEqual(device.config.type, "SoundTouch 20")
+        self.assertEqual(device.config.account_uuid, "AccountUUIDValue")
+        self.assertEqual(device.config.module_type, "sm2")
+        self.assertEqual(device.config.variant, "spotty")
+        self.assertEqual(device.config.variant_mode, "normal")
+        self.assertEqual(device.config.country_code, "GB")
+        self.assertEqual(device.config.region_code, "GB")
+        self.assertEqual(len(device.config.networks), 2)
+        self.assertEqual(len(device.config.components), 2)
+        self.assertListEqual(
+            [component.category for component in device.config.components],
+            ['SCM', 'PackagedProduct'])
+        self.assertListEqual(
+            [component.serial_number for component in
+             device.config.components],
+            ['XXXXX', 'YYYYY'])
+        self.assertListEqual(
+            [component.software_version for component in
+             device.config.components],
+            ['13.0.9.29919.1889959 epdbuild.trunk.cepeswbldXXX', None])
+
+    @mock.patch('requests.get', side_effect=_mocked_device_info_utf8)
+    def test_init_device_utf8(self, mocked_device_info):
+        device = libsoundtouch.soundtouch_device("192.168.1.1")
+        self.assertEqual(mocked_device_info.call_count, 1)
+        self.assertEqual(device.host, "192.168.1.1")
+        self.assertEqual(device.port, 8090)
+        self.assertEqual(device.ws_port, 8080)
+        self.assertEqual(device.dlna_port, 8091)
+        self.assertEqual(device.config.device_id, "00112233445566")
+        self.assertEqual(device.config.device_ip, "192.168.1.1")
+        self.assertEqual(device.config.mac_address, "66554433221100")
+        self.assertEqual(device.config.name, u'Küche')
         self.assertEqual(device.config.type, "SoundTouch 20")
         self.assertEqual(device.config.account_uuid, "AccountUUIDValue")
         self.assertEqual(device.config.module_type, "sm2")
@@ -619,6 +667,15 @@ class TestLibSoundTouch(unittest.TestCase):
         self.assertEqual(mocked_device_status.call_count, 1)
         self.assertEqual(status.source, "STANDBY")
         self.assertEqual(status.content_item.source, "STANDBY")
+
+    @mock.patch('requests.get', side_effect=_mocked_status_spotify_buffering)
+    def test_status_buffering(self, mocked_device_status):
+        device = MockDevice("192.168.1.1")
+        status = device.status()
+        self.assertEqual(mocked_device_status.call_count, 1)
+        self.assertEqual(status.source, "SPOTIFY")
+        self.assertEqual(status.play_status, "BUFFERING_STATE")
+        self.assertIsNone(status.content_item)
 
     @mock.patch('requests.get', side_effect=_mocked_volume)
     def test_volume(self, mocked_volume):
@@ -1079,3 +1136,33 @@ class TestLibSoundTouch(unittest.TestCase):
         self.assertEqual(len(devices), 1)
         self.assertEqual(devices[0].host, "192.168.1.1")
         self.assertEqual(devices[0].port, 8090)
+
+    @mock.patch('requests.post', side_effect=_mocked_select_bluetooth)
+    def test_select_bluetooth(self, mocked_select_bluetooth):
+        device = MockDevice("192.168.1.1")
+        device.select_source_bluetooth()
+        self.assertEqual(mocked_select_bluetooth.call_count, 1)
+
+    @mock.patch('requests.post', side_effect=_mocked_select_aux)
+    def test_select_aux(self, mocked_select_aux):
+        device = MockDevice("192.168.1.1")
+        device.select_source_aux()
+        self.assertEqual(mocked_select_aux.call_count, 1)
+
+    @mock.patch('requests.post', side_effect=_mocked_select_content_item)
+    def test_select_content_item(self, mocked_select_content_item):
+        device = MockDevice("192.168.1.1")
+        device.select_content_item(Source.SPOTIFY, "spotify_account",
+                                   "spotify:artist:2ye2Wgw4gimLv2eAKyk1NB",
+                                   "uri")
+        self.assertEqual(mocked_select_content_item.call_count, 1)
+
+    @mock.patch('requests.get', side_effect=_mocked_status_spotify)
+    @mock.patch('requests.post', side_effect=_mocked_select_content_item)
+    def test_snapshot_restore(self, mocked_device_status,
+                              mocked_select_content_item):
+        device = MockDevice("192.168.1.1")
+        device.snapshot()
+        device.restore()
+        self.assertEqual(mocked_device_status.call_count, 1)
+        self.assertEqual(mocked_select_content_item.call_count, 1)

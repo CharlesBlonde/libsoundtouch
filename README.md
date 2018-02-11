@@ -55,6 +55,17 @@ device.play_media(Source.SPOTIFY, 'spotify:track:5J59VOgvclrhLDYUoH5OaW', spot_u
 account_id = device.status().content_item.source_account
 device.play_media(Source.LOCAL_MUSIC, 'album:1', account_id, Type.ALBUM)
 
+# Snapshot current playing
+device.snapshot()
+
+# Select AUX input
+device.select_source_aux()
+# Select Bluetooth input
+device.select_source_bluetooth()
+
+# Restore previous snapshot
+device.restore()
+
 # Play URL
 device.play_url('http://fqdn/file.mp3')
 
@@ -91,8 +102,10 @@ print(len(zone_status.slaves))
 * volume setting (mute/set volume/volume up/volume down)
 * repeat one/all/off
 * shuffle on/off
+* select AUX/Bluetooth inputs
 * select preset (bookmark)
 * playback selected music
+* allow snapshot and restore playing content
 * play HTTP URL (HTTPS not supported)
 * Websockets notification
 
@@ -163,7 +176,7 @@ time.sleep(600)  # Wait for events
 
 ## Full documentation
 
-[http://libsoundtouch.readthedocs.io] (http://libsoundtouch.readthedocs.io)
+[http://libsoundtouch.readthedocs.io](http://libsoundtouch.readthedocs.io)
 
 ## Incoming features
 
@@ -181,21 +194,65 @@ You have to sent an email and you'll received a response in a minute with 2 PDF:
 
 ## Changelog
 
-| Version |    Date    | Features                                                                   |
-|---------|:----------:|----------------------------------------------------------------------------|
-| 0.7.2   | 2017/07/05 | Add missing template                                                       |
-| 0.7.1   | 2017/07/05 | Remove debugging (print)                                                   |
-| 0.7.0   | 2017/07/05 | Add play_url method to play an HTTP URL (HTTPS not supported)              |
-| 0.6.2   | 2017/06/21 | Fix websocket source status in messages                                    |
-| 0.6.1   | 2017/06/19 | Use enum-compat instead of enum34 directly                                 |
-| 0.6.0   | 2017/06/17 | Add discovery (mDNS) support                                               |
-| 0.5.0   | 2017/05/28 | Add Websocket support                                                      |
-| 0.4.0   | 2017/05/21 | Add Bluetooth source                                                       |
-| 0.3.0   | 2017/04/09 | Allow playing local computer media and fix issue with non ASCII characters |
-| 0.2.2   | 2017/02/07 | Fix status with non ascii characters in Python 2.7                         |
-| 0.2.1   | 2017/02/05 | Fix dependencies                                                           |
-| 0.2.0   | 2017/02/05 | Add *play_media* support                                                   |
-| 0.1.0   | 2016/11/20 | Initial release                                                            |
+### 0.8.0 -  2018/02/11
+
+* Fix: New API content with latest firmware
+* Fix: Device names with UTF-8 characters
+* Allow to select AUX/Bluetooth inputs
+* Add snapshotting/restore feature
+
+### 0.7.2 - 2017/07/05
+
+* Add missing template
+
+### 0.7.1 - 2017/07/05
+
+* Remove debugging (print)                                                   |
+
+### 0.7.0 - 2017/07/05
+
+* Add play_url method to play an HTTP URL (HTTPS not supported)
+
+### 0.6.2 - 2017/06/21
+
+* Fix websocket source status in messages
+
+### 0.6.1 - 2017/06/19
+
+* Use enum-compat instead of enum34 directly
+
+### 0.6.0 - 2017/06/17
+
+* Add discovery (mDNS) support
+
+### 0.5.0 - 2017/05/28
+
+* Add Websocket support
+
+### 0.4.0 - 2017/05/21
+
+* Add Bluetooth source
+
+### 0.3.0 - 2017/04/09
+
+* Fix issue with non ASCII characters
+* Allow playing local computer media
+
+### 0.2.2 - 2017/02/07
+
+* Fix status with non ascii characters in Python 2.7
+
+### 0.2.1 - 2017/02/05
+
+* Fix dependencies
+
+### 0.2.0 - 2017/02/05
+
+* Add *play_media* support
+
+### 0.1.0 - 2016/11/20
+
+* Initial release
 
 ## Contributors
 
@@ -205,4 +262,6 @@ Thanks to:
 * [Tyzer34](https://github.com/Tyzer34) (add *play_media* support)
 * [wanderor](https://github.com/wanderor) (add local computer media support)
 * [obadz](https://github.com/obadz) (add Bluetooth source)
+* [luca-angemi](https://github.com/luca-angemi) (Fix new firmware error)
+* [vanto](https://github.com/vanto) (Fix device names with UTF-8 characters)
 
