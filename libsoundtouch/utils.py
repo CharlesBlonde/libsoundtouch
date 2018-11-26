@@ -59,6 +59,7 @@ class Source(Enum):
     LOCAL_MUSIC = "LOCAL_MUSIC"
     BLUETOOTH = "BLUETOOTH"
     INVALID_SOURCE = "INVALID_SOURCE"
+    TUNEIN = "TUNEIN"
 
 
 class Type(Enum):
