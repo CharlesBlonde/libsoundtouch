@@ -99,6 +99,12 @@ class SoundTouchDevice:
                     self._presets.append(Preset(preset))
                 self.__run_listener(self._presets_updated_listeners,
                                     self._presets)
+            if action == "sourcesUpdated" and action_node.hasChildNodes():
+                self._sources = []
+                for sourceItem in _get_dom_elements(dom, "sourceItem"):
+                    self._sources.append(SourceItem(sourceItem))
+                self.__run_listener(self._sources_updated_listeners,
+                                    self._sources)
             if action == "zoneUpdated":
                 self.__run_listener(self._zone_status_updated_listeners,
                                     self.zone_status(True))
@@ -124,10 +130,12 @@ class SoundTouchDevice:
         self._volume = None
         self._zone_status = None
         self._presets = None
+        self._sources = None
         self._ws_client = None
         self._volume_updated_listeners = []
         self._status_updated_listeners = []
         self._presets_updated_listeners = []
+        self._sources_updated_listeners = []
         self._zone_status_updated_listeners = []
         self._device_info_updated_listeners = []
         self._snapshot = None
@@ -159,6 +167,10 @@ class SoundTouchDevice:
     def add_presets_listener(self, listener):
         """Add a new presets updated listener."""
         self._presets_updated_listeners.append(listener)
+        
+    def add_sources_listener(self, listener):
+        """Add a new sources updated listener."""
+        self._sources_updated_listeners.append(listener)
 
     def add_zone_status_listener(self, listener):
         """Add a new zone status updated listener."""
@@ -182,6 +194,11 @@ class SoundTouchDevice:
         """Remove a new presets updated listener."""
         if listener in self._presets_updated_listeners:
             self._presets_updated_listeners.remove(listener)
+            
+    def remove_sources_listener(self, listener):
+        """Remove a new sources updated listener."""
+        if listener in self._sources_updated_listeners:
+            self._sources_updated_listeners.remove(listener)
 
     def remove_zone_status_listener(self, listener):
         """Remove a new zone status updated listener."""
@@ -204,6 +221,10 @@ class SoundTouchDevice:
     def clear_presets_listeners(self):
         """Clear presets updated listeners."""
         del self._presets_updated_listeners[:]
+        
+    def clear_sources_listeners(self):
+        """Clear sources updated listeners."""
+        del self._sources_updated_listeners[:]
 
     def clear_zone_status_listeners(self):
         """Clear zone status updated listeners."""
@@ -227,6 +248,11 @@ class SoundTouchDevice:
     def presets_updated_listeners(self):
         """Return Presets Updated listeners."""
         return self._presets_updated_listeners
+        
+    @property
+    def sources_updated_listeners(self):
+        """Return Sources Updated listeners."""
+        return self._sources_updated_listeners
 
     @property
     def zone_status_updated_listeners(self):
@@ -262,6 +288,16 @@ class SoundTouchDevice:
         self._presets = []
         for preset in _get_dom_elements(dom, "preset"):
             self._presets.append(Preset(preset))
+            
+    def refresh_sources(self):
+        """Refersh sources."""
+        response = requests.get(
+            "http://" + self._host + ":" + str(self._port) + "/sources")
+        response.encoding = 'UTF-8'
+        dom = minidom.parseString(response.text.encode('utf-8'))
+        self._sources = []
+        for sourceItem in _get_dom_elements(dom, "sourceItem"):
+            self._sources.append(SourceItem(sourceItem))
 
     def refresh_zone_status(self):
         """Refresh Zone Status."""
@@ -508,6 +544,15 @@ class SoundTouchDevice:
         if self._presets is None or refresh:
             self.refresh_presets()
         return self._presets
+        
+    def sources(self, refresh=True):
+        """Sources.
+
+        :param refresh: Force refresh, else return old data.
+        """
+        if self._sources is None or refresh:
+            self.refresh_sources()
+        return self._sources
 
     def set_volume(self, level):
         """Set volume level: from 0 to 100."""
@@ -938,6 +983,48 @@ class ContentItem:
                   self.is_presetable]
         formated_fields = [str(f) for f in fields]
         return 'ContentItem(' + ",".join(formated_fields) + ')'
+
+
+class SourceItem:
+    """Source item."""
+
+    def __init__(self, xml_dom):
+        """Create a new source item.
+
+        :param xml_dom: Source item XML DOM
+        """
+        self._source = _get_dom_attribute(xml_dom, "source")
+        self._source_account = _get_dom_attribute(xml_dom, "sourceAccount")
+        self._status = _get_dom_attribute(xml_dom, "status")
+        self._is_local = _get_dom_attribute(xml_dom,
+                                             "isLocal") == 'true'
+        self._multi_room_allowed = _get_dom_attribute(xml_dom,
+                                             "multiroomallowed") == 'true'
+
+    @property
+    def source(self):
+        """Source."""
+        return self._source
+
+    @property
+    def source_account(self):
+        """Source account."""
+        return self._source_account
+        
+    @property
+    def status(self):
+        """Status."""
+        return self._status
+
+    @property
+    def is_local(self):
+        """Return true if local."""
+        return self._is_local
+
+    @property
+    def multi_room_allowed(self):
+        """Return true if multi room allowed."""
+        return self._multi_room_allowed
 
 
 class Volume:
