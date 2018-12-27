@@ -996,7 +996,7 @@ class SourceItem:
         self._source_account = _get_dom_attribute(xml_dom, "sourceAccount")
         self._status = _get_dom_attribute(xml_dom, "status")
         self._is_local = _get_dom_attribute(xml_dom, "isLocal") == 'true'
-        self._multi_room_allowed = _get_dom_attribute(xml_dom, \
+        self._multi_room_allowed = _get_dom_attribute(xml_dom,
                                                       "multiroomallowed") == 'true'
 
     @property
