@@ -34,8 +34,7 @@ def _get_dom_element_attribute(xml_dom, element, attribute,
         if attribute in element.attributes.keys():
             return element.attributes[attribute].value
         return None
-    else:
-        return default_value
+    return default_value
 
 
 def _get_dom_elements(xml_dom, element):
@@ -101,8 +100,8 @@ class SoundTouchDevice:
                                     self._presets)
             if action == "sourcesUpdated" and action_node.hasChildNodes():
                 self._sources = []
-                for sourceItem in _get_dom_elements(dom, "sourceItem"):
-                    self._sources.append(SourceItem(sourceItem))
+                for source_item in _get_dom_elements(dom, "sourceItem"):
+                    self._sources.append(SourceItem(source_item))
                 self.__run_listener(self._sources_updated_listeners,
                                     self._sources)
             if action == "zoneUpdated":
@@ -167,7 +166,7 @@ class SoundTouchDevice:
     def add_presets_listener(self, listener):
         """Add a new presets updated listener."""
         self._presets_updated_listeners.append(listener)
-        
+
     def add_sources_listener(self, listener):
         """Add a new sources updated listener."""
         self._sources_updated_listeners.append(listener)
@@ -194,7 +193,7 @@ class SoundTouchDevice:
         """Remove a new presets updated listener."""
         if listener in self._presets_updated_listeners:
             self._presets_updated_listeners.remove(listener)
-            
+
     def remove_sources_listener(self, listener):
         """Remove a new sources updated listener."""
         if listener in self._sources_updated_listeners:
@@ -221,7 +220,7 @@ class SoundTouchDevice:
     def clear_presets_listeners(self):
         """Clear presets updated listeners."""
         del self._presets_updated_listeners[:]
-        
+
     def clear_sources_listeners(self):
         """Clear sources updated listeners."""
         del self._sources_updated_listeners[:]
@@ -248,7 +247,7 @@ class SoundTouchDevice:
     def presets_updated_listeners(self):
         """Return Presets Updated listeners."""
         return self._presets_updated_listeners
-        
+
     @property
     def sources_updated_listeners(self):
         """Return Sources Updated listeners."""
@@ -296,8 +295,8 @@ class SoundTouchDevice:
         response.encoding = 'UTF-8'
         dom = minidom.parseString(response.text.encode('utf-8'))
         self._sources = []
-        for sourceItem in _get_dom_elements(dom, "sourceItem"):
-            self._sources.append(SourceItem(sourceItem))
+        for source_item in _get_dom_elements(dom, "sourceItem"):
+            self._sources.append(SourceItem(source_item))
 
     def refresh_zone_status(self):
         """Refresh Zone Status."""
@@ -544,7 +543,7 @@ class SoundTouchDevice:
         if self._presets is None or refresh:
             self.refresh_presets()
         return self._presets
-        
+
     def sources(self, refresh=True):
         """Sources.
 
@@ -996,10 +995,9 @@ class SourceItem:
         self._source = _get_dom_attribute(xml_dom, "source")
         self._source_account = _get_dom_attribute(xml_dom, "sourceAccount")
         self._status = _get_dom_attribute(xml_dom, "status")
-        self._is_local = _get_dom_attribute(xml_dom,
-                                             "isLocal") == 'true'
-        self._multi_room_allowed = _get_dom_attribute(xml_dom,
-                                             "multiroomallowed") == 'true'
+        self._is_local = _get_dom_attribute(xml_dom, "isLocal") == 'true'
+        self._multi_room_allowed = _get_dom_attribute(xml_dom, \
+                                                      "multiroomallowed") == 'true'
 
     @property
     def source(self):
@@ -1010,7 +1008,7 @@ class SourceItem:
     def source_account(self):
         """Source account."""
         return self._source_account
-        
+
     @property
     def status(self):
         """Status."""
