@@ -287,7 +287,7 @@ class SoundTouchDevice:
         self._presets = []
         for preset in _get_dom_elements(dom, "preset"):
             self._presets.append(Preset(preset))
-            
+
     def refresh_sources(self):
         """Refersh sources."""
         response = requests.get(
@@ -997,7 +997,8 @@ class SourceItem:
         self._status = _get_dom_attribute(xml_dom, "status")
         self._is_local = _get_dom_attribute(xml_dom, "isLocal") == 'true'
         self._multi_room_allowed = _get_dom_attribute(xml_dom,
-                                                      "multiroomallowed") == 'true'
+                                                      "multiroomallowed") \
+                                                      == 'true'
 
     @property
     def source(self):
