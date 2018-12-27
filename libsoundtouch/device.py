@@ -2,6 +2,7 @@
 
 # pylint: disable=too-many-public-methods,too-many-instance-attributes,
 # pylint: disable=useless-super-delegation,too-many-lines
+# pylint: disable=useless-object-inheritance
 
 import logging
 import os
@@ -68,7 +69,7 @@ class WebSocketThread(Thread):
         self._ws.run_forever()
 
 
-class SoundTouchDevice(object):
+class SoundTouchDevice:
     """Bose SoundTouch Device."""
 
     @staticmethod
