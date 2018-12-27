@@ -68,7 +68,7 @@ class WebSocketThread(Thread):
         self._ws.run_forever()
 
 
-class SoundTouchDevice:
+class SoundTouchDevice(object):
     """Bose SoundTouch Device."""
 
     @staticmethod
