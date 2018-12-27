@@ -349,7 +349,7 @@ class SoundTouchDevice:
         self.select_content_item(Source.BLUETOOTH)
 
     def _create_zone(self, slaves):
-        if len(slaves) <= 0:
+        if not slaves:
             raise NoSlavesException()
         request_body = '<zone master="%s" senderIPAddress="%s">' % (
             self.config.device_id, self.config.device_ip
@@ -361,7 +361,7 @@ class SoundTouchDevice:
         return request_body
 
     def _get_zone_request_body(self, slaves):
-        if len(slaves) <= 0:
+        if not slaves:
             raise NoSlavesException()
         request_body = '<zone master="%s">' % self.config.device_id
         for slave in slaves:
@@ -415,7 +415,7 @@ class SoundTouchDevice:
         if self.zone_status() is None:
             raise NoExistingZoneException()
         request_body = self._get_zone_request_body(slaves)
-        _LOGGER.info("Removing slaves from multi-room zone with master " +
+        _LOGGER.info("Removing slaves from multi-room zone with master "
                      "device %s", self.config.name)
         requests.post(
             "http://" + self.host + ":" + str(
