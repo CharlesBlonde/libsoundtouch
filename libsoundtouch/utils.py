@@ -75,7 +75,7 @@ class Type(Enum):
     PLAYLIST = "playlist"
 
 
-class SoundtouchDeviceListener(object):
+class SoundtouchDeviceListener:
     """Message listener."""
 
     def __init__(self, add_device_function):
