@@ -89,6 +89,10 @@ class SoundTouchDevice:
                 self._volume = Volume(action_node.firstChild)
                 self.__run_listener(self._volume_updated_listeners,
                                     self._volume)
+            if action == "bassUpdated":
+                self.refresh_bass()
+                self.__run_listener(self._bass_updated_listeners,
+                                    self._bass)
             if action == "nowPlayingUpdated":
                 self._status = Status(action_node)
                 self.__run_listener(self._status_updated_listeners,
@@ -122,10 +126,12 @@ class SoundTouchDevice:
         self.__init_config()
         self._status = None
         self._volume = None
+        self._bass = None
         self._zone_status = None
         self._presets = None
         self._ws_client = None
         self._volume_updated_listeners = []
+        self._bass_updated_listeners = []
         self._status_updated_listeners = []
         self._presets_updated_listeners = []
         self._zone_status_updated_listeners = []
@@ -151,6 +157,10 @@ class SoundTouchDevice:
     def add_volume_listener(self, listener):
         """Add a new volume updated listener."""
         self._volume_updated_listeners.append(listener)
+    
+    def add_bass_listener(self, listener):
+        """Add a new bass updated listener."""
+        self._bass_updated_listeners.append(listener)
 
     def add_status_listener(self, listener):
         """Add a new status updated listener."""
@@ -172,6 +182,11 @@ class SoundTouchDevice:
         """Remove a new volume updated listener."""
         if listener in self._volume_updated_listeners:
             self._volume_updated_listeners.remove(listener)
+    
+    def remove_bass_listener(self, listener):
+        """Remove a new bass updated listener."""
+        if listener in self._bass_updated_listeners:
+            self._bass_updated_listeners.remove(listener)
 
     def remove_status_listener(self, listener):
         """Remove a new status updated listener."""
@@ -197,6 +212,10 @@ class SoundTouchDevice:
         """Clear volume updated listeners."""
         del self._volume_updated_listeners[:]
 
+    def clear_bass_listeners(self):
+        """Clear bass updated listeners."""
+        del self._bass_updated_listeners[:]
+
     def clear_status_listener(self):
         """Clear status updated listeners."""
         del self._status_updated_listeners[:]
@@ -217,6 +236,11 @@ class SoundTouchDevice:
     def volume_updated_listeners(self):
         """Return Volume Updated listeners."""
         return self._volume_updated_listeners
+
+    @property
+    def bass_updated_listeners(self):
+        """Return Bass Updated listeners."""
+        return self._bass_updated_listeners
 
     @property
     def status_updated_listeners(self):
@@ -252,6 +276,13 @@ class SoundTouchDevice:
             "http://" + self._host + ":" + str(self._port) + "/volume")
         dom = minidom.parseString(response.text)
         self._volume = Volume(dom)
+
+    def refresh_bass(self):
+        """Refresh bass state."""
+        response = requests.get(
+            "http://" + self._host + ":" + str(self._port) + "/bass")
+        dom = minidom.parseString(response.text)
+        self._bass = Bass(dom)
 
     def refresh_presets(self):
         """Refresh presets."""
@@ -491,6 +522,15 @@ class SoundTouchDevice:
             self.refresh_volume()
         return self._volume
 
+    def bass(self, refresh=True):
+        """Get bass object.
+
+        :param refresh: Force refresh, else return old data.
+        """
+        if self._bass is None or refresh:
+            self.refresh_bass()
+        return self._bass
+
     def zone_status(self, refresh=True):
         """Get Zone Status.
 
@@ -515,6 +555,13 @@ class SoundTouchDevice:
         volume = '<volume>%s</volume>' % level
         requests.post('http://' + self._host + ":" + str(self._port) + action,
                       volume)
+
+    def set_bass(self, level):
+        """Set bass level: from -5 to 0."""
+        action = '/bass'
+        bass = '<bass>%s</bass>' % level
+        requests.post('http://' + self._host + ":" + str(self._port) + action,
+                      bass)
 
     def mute(self):
         """Mute/Un-mute volume."""
@@ -966,6 +1013,28 @@ class Volume:
     def muted(self):
         """Return True if volume is muted."""
         return self._muted
+
+
+class Bass:
+    """Bass configuration."""
+
+    def __init__(self, xml_dom):
+        """Create a new Bass configuration.
+
+        :param xml_dom: Bass configuration XML DOM
+        """
+        self._actual = int(_get_dom_element_value(xml_dom, "actualbass"))
+        self._target = int(_get_dom_element_value(xml_dom, "targetbass"))
+
+    @property
+    def actual(self):
+        """Actual bass level."""
+        return self._actual
+
+    @property
+    def target(self):
+        """Target bass level."""
+        return self._target
 
 
 class Preset:
