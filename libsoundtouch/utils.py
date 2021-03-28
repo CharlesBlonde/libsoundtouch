@@ -99,5 +99,5 @@ class SoundtouchDeviceListener(object):
         """
         device_name = (name.split(".")[0])
         info = zeroconf.get_service_info(device_type, name)
-        address = socket.inet_ntoa(info.address)
+        address = socket.inet_ntoa(info.addresses[0])
         self.add_device_function(device_name, address, info.port)
