@@ -105,6 +105,7 @@ class WebSocketThread(Thread):
     def terminate(self):
         self._should_run = False
         self._ws.close()
+        self.join()
 
     def run(self):
         """Start Websocket thread."""
@@ -122,14 +123,15 @@ class SoundTouchDevice:
         for listener in listeners:
             listener(value)
 
-    def _on_error(self, web_socket, message):
+    def _on_error(self, message):
         print('ERROR(_on_error):' + str(message))
 
-    def _on_message(self, web_socket, message):
+    def _on_message(self,  message):
         # pylint: disable=unused-argument
         """Call when web socket is received."""
         try:
-			dom = minidom.parseString(message.encode('utf-8'))
+			msg = message #.encode('ascii', errors='replace')
+			dom = minidom.parseString(msg)
 			if dom.firstChild.nodeName == "updates":
 				action_node = dom.firstChild.firstChild
 				action = action_node.nodeName
@@ -168,6 +170,7 @@ class SoundTouchDevice:
             exc_type, exc_value, exc_traceback = sys.exc_info()
             traceback.print_exception(exc_type, exc_value, exc_traceback,
                               limit=2, file=sys.stdout)
+            _LOGGER.error("Faulty message: " + message)
 
     def __init__(self, host, port=8090, ws_port=8080, dlna_port=8091):
         """Create a new Soundtouch device.

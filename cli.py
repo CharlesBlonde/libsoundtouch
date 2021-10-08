@@ -258,7 +258,7 @@ def print_play_status(status, eol='\n'):
 
 # Volume updated
 def volume_listener(volume):
-	print('WebSocket - Volume: ' + int(volume.actual))
+	print('WebSocket - Volume: ' + str(volume.actual))
 
 # Status updated
 def status_listener(status):
