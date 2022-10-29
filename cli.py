@@ -5,7 +5,7 @@ from pprint import pprint
 import sys
 import logging
 import argparse
-import StringIO
+from io import StringIO
 # Local Imports
 from libsoundtouch import soundtouch_device
 from libsoundtouch.device import get_source_type
@@ -194,7 +194,7 @@ class SoundtouchPrompt(Cmd):
 		return True
 
 def print_status(status):
-	varDump = StringIO.StringIO()
+	varDump = StringIO()
 	pprint(vars(status), stream=varDump)
 	pprint(vars(status.content_item), stream=varDump)
 	_LOGGER.debug(varDump.getvalue())
