@@ -1,0 +1,4 @@
+- Handle errors properly
+	+ If connections gets lost, automatically try to re-establish it
+	+ If an error occurs (_on_error gets called), close and shutdown everything, and try to re-establish a connections
+	+ If the connections gets closed for some non-erroneous reasons, try to re-establish it
